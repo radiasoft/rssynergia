@@ -1,3 +1,11 @@
+MANIFEST.in
+tox.ini
+pytest.ini
+pykern_setup.yaml
+.python-version
+.#*
+\#*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -12,8 +20,8 @@ build/
 develop-eggs/
 dist/
 downloads/
-eggs/
 .eggs/
+eggs/
 lib/
 lib64/
 parts/
@@ -37,11 +45,9 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .coverage
-.coverage.*
 .cache
 nosetests.xml
 coverage.xml
-*,cover
 
 # Translations
 *.mo
