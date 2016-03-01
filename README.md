@@ -1,6 +1,6 @@
 ### rs_synergia
 
-Support tools for Synergia
+Support tools for Synergia.
 
 Learn more at https://github.com/radiasoft/rs_synergia.
 
