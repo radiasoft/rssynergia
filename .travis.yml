@@ -4,8 +4,10 @@ branches:
   only:
     - master
 install:
-  - pip install -U pip setuptools
+  - pip install -U pip
+  - pip uninstall -y setuptools
+  - pip install setuptools==20.1.1
   - pip install -U pytest
-  - pip install -U -r requirements.txt
+  - pip install -r requirements.txt
 script:
   - python setup.py pkdeploy
