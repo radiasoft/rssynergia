@@ -5,6 +5,7 @@ branches:
     - master
 install:
   - pip install -U pip setuptools
+  - pip install -U pytest
   - pip install -U -r requirements.txt
 script:
   - python setup.py pkdeploy
