@@ -1,7 +1,7 @@
 Welcome to rssynergia
 =================
 
-Support tools for Synergia
+Support tools for Synergia.
 
 .. toctree::
    :maxdepth: 2
