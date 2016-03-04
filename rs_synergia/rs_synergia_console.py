@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-u"""Front-end command line for :mod:`rs_synergia`.
+u"""Front-end command line for :mod:`rssynergia`.
 
 See :mod:`pykern.pkcli` for how this module is used.
 
@@ -14,7 +14,7 @@ from pykern import pkcli
 
 
 def main():
-    return pkcli.main('rs_synergia')
+    return pkcli.main('rssynergia')
 
 
 if __name__ == '__main__':

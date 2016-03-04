@@ -1,4 +1,4 @@
-Welcome to rs_synergia
+Welcome to rssynergia
 =================
 
 Support tools for Synergia
@@ -6,7 +6,7 @@ Support tools for Synergia
 .. toctree::
    :maxdepth: 2
 
-   rs_synergia
+   rssynergia
    modules
 
 Indices and tables

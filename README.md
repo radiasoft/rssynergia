@@ -1,10 +1,10 @@
-### rs_synergia
+### rssynergia
 
 Support tools for Synergia.
 
-Learn more at https://github.com/radiasoft/rs_synergia.
+Learn more at https://github.com/radiasoft/rssynergia.
 
-Documentation: http://rs_synergia.readthedocs.org/en/latest/
+Documentation: http://rssynergia.readthedocs.org/en/latest/
 
 #### License
 
