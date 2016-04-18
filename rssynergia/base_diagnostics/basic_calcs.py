@@ -1,4 +1,6 @@
 #A collection of miscellaneous useful scripts. These will be refined and reorganized in time.
+#Author: Nathan Cook
+#10/10/2015
 
 import numpy as np
 import scipy.constants as const
@@ -45,8 +47,6 @@ def get_rms_envelope(dim, particles):
     
     return  sig_w 
     
-
-
     
 def get_emittance(dim, bunch):
     '''Returns the statistical emittance (in x or y) of a bunch which centered at (0,0) and not rotated with respect to the x-y axes'''
@@ -74,16 +74,83 @@ def get_emittance(dim, bunch):
 
 
 def get_normalized_emittance(dim, bunch, beta, gamma):
-    '''Calculate the normalized emittance for a bunch with a given gamma and beta'''
     
     return get_emittance(dim, bunch)*(beta*gamma)
     
-def get_geometric_emittance(norm_emit,beta,gamma):
+def calc_geometric_emittance(norm_emit,beta,gamma):
     '''Return the geometric emittance given a normalized emittance value and a beta/gamma.'''
     
     return norm_emit/(beta*gamma)
     
+def calc_normalized_emittance(g_emit,beta,gamma):
+    '''Return the normalized emittance given a geometric emittance value and a beta/gamma.'''
     
+    return g_emit*(beta*gamma)
+
+
+def calc_properties(bunch,ref):
+    '''Return an array of different bunch properties
+    
+    Arguments:
+    bunch - a Synergia bunch
+    ref - a Synergia reference particle
+    
+    '''
+    
+    beta = ref.get_beta()
+    gamma = ref.get_gamma()
+    
+    g_emit_x = get_emittance('x',bunch)
+    g_emit_y = get_emittance('y',bunch)
+    particles = bunch.get_local_particles()
+    x_vals = particles[:,0]
+    y_vals = particles[:,2]
+    xp_vals = particles[:,1]
+    yp_vals = particles[:,3]
+    
+    xenv = np.sqrt(np.mean(x_vals**2))
+    print "rms envelope x: {} mm".format(xenv*1.e3)
+    
+    yenv = np.sqrt(np.mean(y_vals**2))
+    print "rms envelope y: {} mm".format(yenv*1.e3)
+    
+    xmax = np.max(x_vals)
+    print "maximum x value is : {} mm".format(xmax*1.e3)
+    
+    ymax = np.max(y_vals)
+    print "maximum y value is : {} mm".format(ymax*1.e3)
+    
+    xbet = np.mean(x_vals**2)/g_emit_x
+    print "rms beta x: {}".format(xbet)
+    
+    ybet = np.mean(y_vals**2)/g_emit_y
+    print "rms beta y: {}".format(ybet)
+    
+    emitx = get_emittance('x',bunch)
+    print "geometric emittance x: {} mm-mrad".format(emitx*1.e6)
+    
+    emity = get_emittance('y',bunch)
+    print "geometric emittance y: {} mm-mrad".format(emity*1.e6)    
+        
+    n_emitx = get_normalized_emittance('x',bunch,beta,gamma)
+    print "normalized emittance x: {} mm-mrad".format(n_emitx*1.e6)
+    
+    n_emity = get_normalized_emittance('y',bunch,beta,gamma)
+    print "normalized emittance y: {} mm-mrad".format(n_emity*1.e6)
+    
+    x2_mean = np.mean(xp_vals**2)
+    print "mean of xp^2 : {}".format(x2_mean)
+    
+    y2_mean = np.mean(yp_vals**2)
+    print "mean of yp^2 : {}".format(y2_mean)
+    
+    emit_total_x = xmax**2/xbet
+    print "total geometric emittance x: {} mm-mrad".format(emit_total_x*1.e6)
+    
+    emit_total_y = ymax**2/ybet
+    print "total geometric emittance y: {} mm-mrad".format(emit_total_y*1.e6)
+
+
 def get_base_nll(nn, l0, mu0, t, c):
     '''Construct the nonlinear element. Taken from madx script by A. Valishev. 
     Verified by David's python script for pyOrbit.

@@ -19,10 +19,13 @@ coords['dpop'] = 5
 coords['id'] = 6
 
 
-def plot_one(opts, particles,header):
+def plotbeam(opts, particles,header):
+
+    '''Returns a 2D plot of particle distribution in the choosen coordinate space'''
 
     h = particles[:,coords[opts.hcoord]]
     v = particles[:,coords[opts.vcoord]]
+    #vcoords = particles[:,coords[vc]] for vc in opts.vcoord
 
     fig = plt.figure()
     ax = plt.gca()
@@ -74,9 +77,10 @@ def get_particles(opts):
 
 def plot_beam(opts):
     
+    '''Plot a beam of particles given an options object input.'''
     
     header, particles = get_particles(opts)
 
     if opts.plots ==1:
-        plot_one(opts, particles,header)
+        plotbeam(opts, particles,header)
         

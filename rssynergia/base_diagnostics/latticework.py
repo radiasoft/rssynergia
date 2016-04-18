@@ -158,11 +158,12 @@ def get_fd_quads(lattice):
                 d_quads.append(elem)
     return (f_quads, d_quads)
     
-def get_sextupoles(lattice):
+def get_sextupoles(lattice, nonzero=True):
     '''Return a list of positive and negative sextupoles
     
     Arguments
-        -lattice - Synergia lattice object
+        lattice - Synergia lattice object
+        nonzero (optional) - Flag for returning only sextupoles with nonzero values
         
     Outputs a pair of lists -  ( [list of positive sextupoles], [list of negative sextupoles] )
     
@@ -176,17 +177,24 @@ def get_sextupoles(lattice):
         if elem.get_type() == "sextupole":
             k2 = elem.get_double_attribute("k2")
             if k2 > 0.0:
-                p_six.append(elem)
+                #p_six.append(elem)
+                p_six.append(elem.get_name())
             elif k2 < 0.0:
-                n_six.append(elem)
+                #n_six.append(elem)
+                n_six.append(elem.get_name())
             elif k2 == 0:
-                'sextupole strength is 0, so split elements between positive and negative list'
-                if last == 'n_six':
-                    p_six.append(elem)
-                    last = 'p_six'
-                elif last == 'p_six':
-                    n_six.append(elem)
-                    last = 'n_six'
+                if nonzero:
+                    pass
+                else:
+                    #sextupole strength is 0, so split elements between positive and negative list
+                    if last == 'n_six':
+                        #p_six.append(elem)
+                        p_six.append(elem.get_name())
+                        last = 'p_six'
+                    elif last == 'p_six':
+                        #n_six.append(elem)
+                        n_six.append(elem.get_name())
+                        last = 'n_six'
  
     return (p_six, n_six)
 
@@ -342,17 +350,18 @@ def DEPRECATED_adjust_chromaticity(lattice, maglist,):
 
 def chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
     '''
-        -lattice - synergia lattice
-        -p_list - list of positive sextupole lattice element names which should be varied
-        -n_list - list of negative sextupole lattice element names which should be varied 
-        -C0 - a value for C_x, C_y we want to reach
-        
-        DEPRECTATED:
-            -p_s - list of positive-valued sextupoles to adjust
-            -n_s - list of negative-values sextupoles to adjust
+    Adjust a lattice to meet a desired chromaticity goal in each plane
+    
+    Arguments:
+        l_s - Synergia lattice simulator object
+        p_list - list of positive sextupole lattice element names which should be varied
+        n_list - list of negative sextupole lattice element names which should be varied 
+        cx - goal value for horizontal chromaticity
+        cy (optional) - goal value for vertical chromaticity (default cy = cx)
     '''
     
     c_tol = 1.e-3
+    c_tol = 1.
     cx_goal = cx
     if cy:
         cy_goal = cy
@@ -365,7 +374,8 @@ def chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
     n_s = [ele for ele in lattice.get_elements() if ele.get_name() in n_list]
     
     #adjust the chromaticity
-    l_s.adjust_chromaticities(cx_goal,cy_goal,p_s,n_s,c_tol)
+    #Note - default max steps is 6
+    l_s.adjust_chromaticities(cx_goal,cy_goal,p_s,n_s,c_tol,100)
     
     cv_final = l_s.get_vertical_chromaticity()
     cx_final = l_s.get_horizontal_chromaticity()
@@ -386,7 +396,75 @@ def chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
     
     return cost
 
+########################### Compare lattice functions at entrance##############################
+def get_starting_lf(lattice_simulator):
+    '''Return the lattice functions at the starting position of the lattice simulator'''
+    
+    
+    slices = lattice_simulator.get_slices()
+    lf = lattice_simulator.get_lattice_functions(slices[0])
+    
+    print "Initial starting lattice functions: betax = {}, betay = {}, alphax = {}, alphay = {}".format(lf.beta_x,lf.beta_y,lf.alpha_x,lf.alpha_y)
+    
+    return lf.beta_x,lf.beta_y,lf.alpha_x,lf.alpha_y
+    
 
+###########################Set up stepper and lattice simulator##############################
+def generate_stepper(lattice, coll_operator, opts):
+
+    requested_stepper = opts.stepper
+
+    if requested_stepper == "splitoperator":
+        print "Using split-operator stepper with ", opts.steps, " steps/turn"
+        stepper = synergia.simulation.Split_operator_stepper(lattice, opts.map_order, coll_operator, opts.steps)
+
+    elif requested_stepper == "soelements":
+        print "Using split-operator stepper elements with ", opts.steps_per_element, " steps/element"
+        stepper = synergia.simulation.Split_operator_stepper_elements(lattice, opts.map_order, coll_operator, opts.steps_per_element)
+
+    elif requested_stepper == "independent":
+        print "Using independent-operator stepper with ", opts.steps, " steps/turn"
+        stepper = synergia.simulation.Independent_stepper(lattice, opts.map_order, opts.steps)
+    
+    elif requested_stepper == "elements":
+        print "Using step-by-elements-operator stepper with ", opts.steps_per_element, " steps/element"
+        stepper = synergia.simulation.Independent_stepper_elements(lattice, opts.map_order, opts.steps_per_element)
+
+    else:
+        raise RuntimeError, "stepper %s invalid, must be either 'splitoperator', 'independent' or 'elements'"%requested_stepper
+
+
+    return stepper
+
+
+###########################Lattice element string adjustment##############################
+def set_lattice_element_type(lattice, opts):
+
+    for elem in lattice.get_elements():
+            #set an aperture if specified
+        if opts.radius:
+            elem.set_double_attribute("circular_aperture_radius", opts.radius)
+
+        # set the propagation method.
+        # extractor_type may be "chef_maps", "chef_mixed", or
+        #    chef_propagate
+        if opts.use_maps == "taylor":
+            pass
+        elif opts.use_maps == "all":
+            elem.set_string_attribute("extractor_type", "chef_map")
+        elif opts.use_maps == "none":
+            elem.set_string_attribute("extractor_type", "chef_propagate")
+        elif opts.use_maps == "nonrf":
+            elem.set_string_attribute("extractor_type", "chef_mixed")
+        elif opts.use_maps == "onlyrf":
+            if elem.get_type() == "rfcavity":
+                elem.set_string_attribute("extractor_type", "chef_map")
+            else:
+                elem.set_string_attribute("extractor_type", "chef_propagate")
+        else:
+            raise RuntimeError, "bad options for use_maps: %d"%opts.use_maps
+
+    return lattice
 
 
 #############################Lattice Comparison Script ###################################

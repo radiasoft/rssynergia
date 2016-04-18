@@ -110,11 +110,11 @@ def cleanup(dirname):
                 else:
                     #perhaps trying to move to a new disk or something that os can't handle
                     raise
+
                     
 def log_input(opts):
     '''Write an output file containing necessary simulation parameters for reproduction'''
     
-    
-    
+
     
     
