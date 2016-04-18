@@ -35,7 +35,7 @@ class ellipticPostProcessing:
         return hamiltonian
         
         
-    def computeInvariant(self, xHat, pxHat, yHat, pyHat):
+    def computeinvariant(self, xHat, pxHat, yHat, pyHat):
         """Compute the 2nd invariant for the integrable elliptic potential"""
 
         xN = xHat / self.ellipticC
@@ -63,7 +63,7 @@ class ellipticPostProcessing:
         return invariant
         
         
-    def processParticles(self, x, px, y, py):
+    def processparticles(self, x, px, y, py):
         """
         Given arrays of particles, compute the two invariants of the elliptic potential
         Args:
@@ -82,6 +82,6 @@ class ellipticPostProcessing:
         pyHat = py*self.rtbeta - 0.5*self.betaPrime*yHat
         
         H = self.computeHamiltonian(xHat, pxHat, yHat, pyHat)
-        I = self.computeInvariant(xHat, pxHat, yHat, pyHat)
+        I = self.computeinvariant(xHat, pxHat, yHat, pyHat)
         
         return H, I

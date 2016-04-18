@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from elliptic import ellipticBeam
+from elliptic import ellipticbeam
 from scipy import constants as consts
 import random, time
 import sys, os
@@ -16,7 +16,7 @@ from base_diagnostics import workflow
 from base_diagnostics import latticework
 
 
-def toyEllipticalBeam6D(opts):
+def toyellipticalbeam6D(opts):
     '''
     
     Generate a toy costing beam with fixed elliptical Hamiltonian and returns the particle array.
@@ -76,9 +76,9 @@ def toyEllipticalBeam6D(opts):
         innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
         transverseEmittance = emit
 
-        myBunchGenerator = ellipticBeam.ellipticBeam(t, c, beta, betaPrime)
+        myBunchGenerator = ellipticbeam.EllipticBeam(t, c, beta, betaPrime)
         #coords is an array of 4-vectors containing coordinate space information
-        coords = myBunchGenerator.generateFixedBunch(transverseEmittance, numMacroParticles, opts.seed)
+        coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
         
         
         for idx in range(len(coords)):
@@ -119,7 +119,7 @@ def toyEllipticalBeam6D(opts):
     return np.asarray(bunch)
 
 
-def EllipticalBeam6D(opts):
+def ellipticalbeam6D(opts):
     '''Generate a coasting beam with elliptical transverse distribution and saves it to a txt file'''
 # Generates a coasting beam of Gaussian longitudinal distribution
 
@@ -177,8 +177,8 @@ def EllipticalBeam6D(opts):
         #tArray[idx] = random.gauss(0., bunchLength)
         cdtArray[idx] = random.gauss(0, sigmaz)
 
-    myBunchGenerator = ellipticBeam.ellipticBeam(t, c, beta, betaPrime)
-    bunch = myBunchGenerator.generateBunch(transverseEmittance, numMacroParticles)
+    myBunchGenerator = ellipticBeam.EllipticBeam(t, c, beta, betaPrime)
+    bunch = myBunchGenerator.generatebunch(transverseEmittance, numMacroParticles)
 
     if os.path.isfile(fileName):
         newFileName = fileName+str(int(time.time()))
@@ -194,7 +194,7 @@ def EllipticalBeam6D(opts):
     bunchFile.close()
     
     
-def make6DEllipticalBeam(lattice_file,lattice_name):
+def make6Dellipticalbeam(lattice_file,lattice_name):
     
     '''Constructs a coasting elliptic beam with Gaussian longitduinal distribution and stores it in a Synergia bunch.
     
@@ -236,7 +236,7 @@ def make6DEllipticalBeam(lattice_file,lattice_name):
 
 
     #construct bunch array and write it to a textfile
-    EllipticalBeam6D(opts)
+    ellipticalbeam6D(opts)
 
     #read in the file and construct a synergia bunch
     particles_file = 'myBunch.txt'

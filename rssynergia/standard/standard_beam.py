@@ -57,7 +57,7 @@ class StandardBeam:
         
         #yMax = y0
         self.emittance = emittance
-        yMax = newton(self.whatsLeft, y0)        
+        yMax = newton(self.whatsleft, y0)        
         
         # x is harder to bound due to the peanut nature of the potential -- estimate using conventional elliptic bunch
         xMax = yMax
