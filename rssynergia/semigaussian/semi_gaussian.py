@@ -32,7 +32,7 @@ class SemiGaussianBeam:
         return potential
         
     def whatsleft(self, yHat):
-        return self.emittance - self.computePotential(0, yHat)
+        return self.emittance - self.computepotential(0, yHat)
     
         
     def generatefixedbunch(self, emittance, nParticles, seed):

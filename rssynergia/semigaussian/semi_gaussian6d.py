@@ -25,45 +25,45 @@ def semigaussianbeam6D(opts):
 
     # Beam parameters
     gamma0 = opts.gamma
-    speciesMass = constants.m_p
+    speciesmass = constants.m_p
     dgammaOgamma = 0
     #We want dpop no dE/E
     dpop = opts.dpop
     #Assume Gaussian longitudinal profile - put bunch length in m
     sigmaz = opts.stdz
-    numMacroParticles = opts.macro_particles
+    num_macro_particles = opts.macro_particles
     
 
     xOffset = 0. #m
     yOffset = 0. #m
-    fileName = opts.bunch_file
+    filename = opts.bunch_file
 
     # Do not modify below this line
     E0 = gamma0 * constants.m_p * constants.c**2 * 6.24150934e9 #GeV/J
-    ESpread = E0 * dgammaOgamma
+    espread = E0 * dgammaOgamma
 
-    #EArray = [0.]*numMacroParticles
-    pArray = [0.]*numMacroParticles
-    #tArray = [0.]*numMacroParticles
-    cdtArray = [0.]*numMacroParticles
+    #EArray = [0.]*num_macro_particles
+    pArray = [0.]*num_macro_particles
+    #tArray = [0.]*num_macro_particles
+    cdtArray = [0.]*num_macro_particles
 
     #fix a random seed!
     random.seed(opts.seed)
 
     bunch = []
-    #innerBunch = np.zeros(numMacroParticles)
+    #innerBunch = np.zeros(num_macro_particles)
 
     for index,emit in enumerate(opts.emits):
         
-        innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
-        transverseEmittance = emit
+        innerBunch = np.zeros(num_macro_particles) #bunch at this emittance
+        transverse_emittance = emit
 
         if opts.betae:
             myBunchGenerator = SemiGaussianBeam(opts.betae) #use betae
         else:
             myBunchGenerator = SemiGaussianBeam() #fixed beta=1, betaprime=0
         #coords is an array of 4-vectors containing coordinate space information
-        coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
+        coords = myBunchGenerator.generatefixedbunch(transverse_emittance, num_macro_particles, opts.seed)
         
         
         lc = coords.shape[0]
@@ -76,9 +76,6 @@ def semigaussianbeam6D(opts):
         cdtArray = np.random.standard_normal(lc)*sigmaz
         ID = index*lc + np.arange(lc)
         
-        #print pArray.shape
-        #print cdtArray.shape
-        #print ID.shape
         coords = np.vstack((coords[:,0],coords[:,1],coords[:,2],coords[:,3],cdtArray,pArray,ID))
         
         #coords[idx] = np.append(coords[idx],[cdtArray[idx],pArray[idx],ID])
@@ -86,20 +83,21 @@ def semigaussianbeam6D(opts):
         bunch.append(coords.T)
         
 
-    toFile = None
-    if toFile:
+    tofile = None
+    if tofile:
 
-        if os.path.isfile(fileName):
-            newFileName = fileName+str(int(time.time()))
+        if os.path.isfile(filename):
+            newfilename = filename+str(int(time.time()))
             print ' !Warning -- '
-            print 'File '+fileName+' already exists. Renaming the old file to '+newFileName
-            os.rename('./'+fileName, './'+newFileName)
+            print 'File '+filename+' already exists. Renaming the old file to '+newfilename
+            os.rename('./'+filename, './'+newfilename)
     
-        bunchFile = open(fileName, 'w')
-        for idx in range(0,numMacroParticles):
-            ptclString = str(bunch[idx][0])+' '+str(bunch[idx][1])+' '+str(bunch[idx][2])+' '+str(bunch[idx][3])+' '+str(cdtArray[idx])+' '+str(pArray[idx])+'\n'
-            bunchFile.write(ptclString)
+        bunchfile = open(filename, 'w')
+        for idx in range(0,num_macro_particles):
+            ptclstring = str(bunch[idx][0])+' '+str(bunch[idx][1])+' '+str(bunch[idx][2])+' '+str(bunch[idx][3])+' '+str(cdtArray[idx])+' '+str(pArray[idx])+'\n'
+            bunchfile.write(ptclstring)
 
+        bunchfile.close()
         bunchFile.close()
         
     return np.asarray(bunch)

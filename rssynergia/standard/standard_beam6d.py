@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from mpi4py import MPI
 from scipy import constants
 
-from standard import standardBeam
+from standard import StandardBeam
 from base_diagnostics import read_bunch
 from base_diagnostics import workflow
 from base_diagnostics import latticework
@@ -14,7 +14,7 @@ from base_diagnostics import latticework
 
 
 
-def toyKVBeam6D(opts):
+def toyKVbeam6D(opts):
     '''
     
     Generate a costing KV beam with fixed Hamiltonian and returns the particle array.
@@ -26,27 +26,27 @@ def toyKVBeam6D(opts):
 
     # Beam parameters
     gamma0 = opts.gamma
-    speciesMass = constants.m_p
+    speciesmass = constants.m_p
     dgammaOgamma = 0
     #We want dpop no dE/E
     dpop = opts.dpop
     #Assume Gaussian longitudinal profile - put bunch length in m
     sigmaz = opts.stdz
-    numMacroParticles = opts.macro_particles
+    num_macro_particles = opts.macro_particles
     
 
     xOffset = 0. #m
     yOffset = 0. #m
-    fileName = opts.bunch_file
+    filename = opts.bunch_file
 
     # Do not modify below this line
     E0 = gamma0 * constants.m_p * constants.c**2 * 6.24150934e9 #GeV/J
-    ESpread = E0 * dgammaOgamma
+    espread = E0 * dgammaOgamma
 
     #EArray = [0.]*numMacroParticles
-    pArray = [0.]*numMacroParticles
+    pArray = [0.]*num_macro_particles
     #tArray = [0.]*numMacroParticles
-    cdtArray = [0.]*numMacroParticles
+    cdtArray = [0.]*num_macro_particles
 
     #fix a random seed!
     random.seed(opts.seed)
@@ -56,21 +56,21 @@ def toyKVBeam6D(opts):
 
     for index,emit in enumerate(opts.emits):
         
-        innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
-        transverseEmittance = emit
+        innerbunch = np.zeros(num_macro_particles) #bunch at this emittance
+        transverse_emittance = emit
 
         if opts.betae:
-            myBunchGenerator = standardBeam(opts.betae) #use betae
+            mybunchgenerator = StandardBeam(opts.betae) #use betae
         else:
-            myBunchGenerator = standardBeam() #fixed beta=1, betaprime=0
+            mybunchgenerator = StandardBeam() #fixed beta=1, betaprime=0
         #coords is an array of 4-vectors containing coordinate space information
-        coords = myBunchGenerator.generateFixedBunch(transverseEmittance, numMacroParticles, opts.seed)
+        coords = mybunchgenerator.generatefixedbunch(transverse_emittance, num_macro_particles, opts.seed)
         
         
         for idx in range(len(coords)):
-            #EArray[idx] = random.gauss(E0, ESpread)
+            #EArray[idx] = random.gauss(E0, espread)
             pArray[idx] = random.gauss(0, dpop)
-            #tArray[idx] = random.gauss(0., bunchLength)
+            #tArray[idx] = random.gauss(0., bunchlength)
             cdtArray[idx] = random.gauss(0, sigmaz)
             
             #assign unique index value to each particle
@@ -78,28 +78,23 @@ def toyKVBeam6D(opts):
         
             coords[idx] = np.append(coords[idx],[cdtArray[idx],pArray[idx],ID])
         
-        #coords.append(pArray[idx])
-        #coords2 = np.asarray(coords)
-        #coords3 = coords2.flatten()
-        
-        
         bunch.append(coords)
         
 
-    toFile = None
-    if toFile:
+    tofile = None
+    if tofile:
 
-        if os.path.isfile(fileName):
-            newFileName = fileName+str(int(time.time()))
+        if os.path.isfile(filename):
+            newfilename = filename+str(int(time.time()))
             print ' !Warning -- '
-            print 'File '+fileName+' already exists. Renaming the old file to '+newFileName
-            os.rename('./'+fileName, './'+newFileName)
+            print 'File '+filename+' already exists. Renaming the old file to '+newfilename
+            os.rename('./'+filename, './'+newfilename)
     
-        bunchFile = open(fileName, 'w')
-        for idx in range(0,numMacroParticles):
-            ptclString = str(bunch[idx][0])+' '+str(bunch[idx][1])+' '+str(bunch[idx][2])+' '+str(bunch[idx][3])+' '+str(cdtArray[idx])+' '+str(pArray[idx])+'\n'
-            bunchFile.write(ptclString)
+        bunchfile = open(filename, 'w')
+        for idx in range(0,num_macro_particles):
+            ptclstring = str(bunch[idx][0])+' '+str(bunch[idx][1])+' '+str(bunch[idx][2])+' '+str(bunch[idx][3])+' '+str(cdtArray[idx])+' '+str(pArray[idx])+'\n'
+            bunchfile.write(ptclstring)
 
-        bunchFile.close()
+        bunchfile.close()
         
     return np.asarray(bunch)

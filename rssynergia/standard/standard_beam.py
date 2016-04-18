@@ -2,7 +2,7 @@ import numpy as np
 import random
 from scipy.optimize import newton
 
-class standardBeam:
+class StandardBeam:
     
     ''' Generic class for generating a bunch distribution with certain properties. Generates a numpy array for easy output/input into other codes.'''
     
@@ -25,17 +25,17 @@ class standardBeam:
         hamiltonian = quadratic 
         return hamiltonian
         
-    def computePotential(self, xHat, yHat):
+    def computepotential(self, xHat, yHat):
         quadratic = 0.5*(xHat**2 + yHat**2)
 
         potential = quadratic
         return potential
         
-    def whatsLeft(self, yHat):
-        return self.emittance - self.computePotential(0, yHat)
+    def whatsleft(self, yHat):
+        return self.emittance - self.computepotential(0, yHat)
 
         
-    def generateFixedBunch(self, emittance, nParticles, seed):
+    def generatefixedbunch(self, emittance, nParticles, seed):
         """ Generate a matched bunch with single emittance and number of particles
         Args:
         emittance (float) the value of fixed H
@@ -71,7 +71,7 @@ class standardBeam:
         while ptclsMade < nParticles:
             xTrial = 2.*(0.5 - random.random())*xMax
             yTrial = 2.*(0.5 - random.random())*yMax
-            trialValue = self.computePotential(xTrial, yTrial)
+            trialValue = self.computepotential(xTrial, yTrial)
             if trialValue < emittance:
                 pMag = np.sqrt(2*(emittance - trialValue))
                 pDir = 2*np.pi * random.random()
