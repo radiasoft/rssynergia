@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from elliptic import ellipticbeam
+from elliptic import elliptic_beam
 from scipy import constants as consts
 import random, time
 import sys, os
@@ -19,10 +19,17 @@ from base_diagnostics import latticework
 def toyellipticalbeam6D(opts):
     '''
     
-    Generate a toy costing beam with fixed elliptical Hamiltonian and returns the particle array.
+    Generate a toy costing beam with fixed elliptical Hamiltonian and returns the particle array, while also saving the array to
+    a text file.
     
     Coordinates are chosen with fixed random number generator seed, so that they should always produce the same initial distribution
     for a given emittance.
+    
+    Args:
+        opts (object): Instance of the Synergia options class containing beam and macroparticle information
+    
+    Returns:
+        bunch (ndarray): NumPy array with bunch with values {x, px, y, py, cdt, z, ID} for each particle
     
     '''
 
@@ -36,16 +43,8 @@ def toyellipticalbeam6D(opts):
     sigmaz = opts.stdz
     numMacroParticles = opts.macro_particles
 
-    t = opts.t #0.4 fixed for IOTA 6-6 for now
-    c = opts.c #0.01 fixed for IOTA 6-6 for now
-    
-    #calculate beta at injection - center of NL element
-    #beta = lf0.beta_x
-    #betaPrime = -2*lf0.alpha_x
-    
-    #beta = 6.1246858201346921
-    #alpha = 3.0776835371752562
-    #betaPrime = 2 * alpha 
+    t = opts.t 
+    c = opts.c 
     
     #Calculate bunch coordinates at entrance to NL magnet section
     beta = opts.betae
@@ -60,9 +59,7 @@ def toyellipticalbeam6D(opts):
     E0 = gamma0 * consts.m_p * consts.c**2 * 6.24150934e9 #GeV/J
     ESpread = E0 * dgammaOgamma
 
-    #EArray = [0.]*numMacroParticles
     pArray = [0.]*numMacroParticles
-    #tArray = [0.]*numMacroParticles
     cdtArray = [0.]*numMacroParticles
 
     #fix a random seed!
@@ -82,20 +79,13 @@ def toyellipticalbeam6D(opts):
         
         
         for idx in range(len(coords)):
-            #EArray[idx] = random.gauss(E0, ESpread)
             pArray[idx] = random.gauss(0, dpop)
-            #tArray[idx] = random.gauss(0., bunchLength)
             cdtArray[idx] = random.gauss(0, sigmaz)
             
             #assign unique index value to each particle
             ID = index*len(coords) + idx
         
             coords[idx] = np.append(coords[idx],[cdtArray[idx],pArray[idx],ID])
-        
-        #coords.append(pArray[idx])
-        #coords2 = np.asarray(coords)
-        #coords3 = coords2.flatten()
-        
         
         bunch.append(coords)
         
@@ -119,9 +109,18 @@ def toyellipticalbeam6D(opts):
     return np.asarray(bunch)
 
 
-def ellipticalbeam6D(opts):
-    '''Generate a coasting beam with elliptical transverse distribution and saves it to a txt file'''
-# Generates a coasting beam of Gaussian longitudinal distribution
+def fixedellipticalbeam6D(opts):
+    """
+    Generate a toy costing beam with fixed elliptical Hamiltonian for fixed lattice parameters
+    and returns the particle array, while also saving the array to a text file.
+    
+    Args:
+        opts (object): Instance of the Synergia options class containing beam and macroparticle information
+    
+    Returns:
+        bunch (ndarray): NumPy array with bunch with values {x, px, y, py, cdt, z, ID} for each particle
+    
+    """
 
     # Beam parameters
     gamma0 = 2.
@@ -131,32 +130,15 @@ def ellipticalbeam6D(opts):
     dpop = opts.dpop
     #Assume Gaussian longitudinal profile - put bunch length in m
     sigmaz = opts.stdz
-    #*consts.c
-    #bunchLength = sigmaz #sec
-    #transverseEmittance = 1.e-5 #m-rad
     transverseEmittance = opts.emit_transverse
     numMacroParticles = opts.macro_particles
 
-    #lattice = opts.lattice
-
-    #t = 0.45
-    #c = 0.0095
     t = 0.4 #fixed for IOTA 6-6 for now
     c = 0.01 #fixed for IOTA 6-6 for now
-    #beta = 0.7
-    #betaPrime = 0.
     
     #calculate beta at injection - center of NL element
-    #beta = lf0.beta_x
-    #betaPrime = -2*lf0.alpha_x
     beta = 0.6538
-    #betaPrime = 0.0002
     betaPrime = 0.0
-    
-    #fixed for 2x tune injection @ start of magnet
-    beta = 6.1246858201346921
-    alpha = 3.0776835371752562
-    betaPrime = 2 * alpha 
 
     xOffset = 0. #m
     yOffset = 0. #m
@@ -166,19 +148,36 @@ def ellipticalbeam6D(opts):
     E0 = gamma0 * consts.m_p * consts.c**2 * 6.24150934e9 #GeV/J
     ESpread = E0 * dgammaOgamma
 
-    #EArray = [0.]*numMacroParticles
     pArray = [0.]*numMacroParticles
-    #tArray = [0.]*numMacroParticles
     cdtArray = [0.]*numMacroParticles
 
     for idx in range(0,numMacroParticles):
-        #EArray[idx] = random.gauss(E0, ESpread)
         pArray[idx] = random.gauss(0, dpop)
-        #tArray[idx] = random.gauss(0., bunchLength)
         cdtArray[idx] = random.gauss(0, sigmaz)
 
     myBunchGenerator = ellipticBeam.EllipticBeam(t, c, beta, betaPrime)
     bunch = myBunchGenerator.generatebunch(transverseEmittance, numMacroParticles)
+    
+    for index,emit in enumerate(opts.emits):
+        
+        innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
+        transverseEmittance = emit
+
+        myBunchGenerator = ellipticbeam.EllipticBeam(t, c, beta, betaPrime)
+        #coords is an array of 4-vectors containing coordinate space information
+        coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
+        
+        
+        for idx in range(len(coords)):
+            pArray[idx] = random.gauss(0, dpop)
+            cdtArray[idx] = random.gauss(0, sigmaz)
+            
+            #assign unique index value to each particle
+            ID = index*len(coords) + idx
+        
+            coords[idx] = np.append(coords[idx],[cdtArray[idx],pArray[idx],ID])
+        
+        bunch.append(coords)
 
     if os.path.isfile(fileName):
         newFileName = fileName+str(int(time.time()))
@@ -192,6 +191,8 @@ def ellipticalbeam6D(opts):
         bunchFile.write(ptclString)
 
     bunchFile.close()
+    
+    return np.asarray(bunch)
     
     
 def make6Dellipticalbeam(lattice_file,lattice_name):

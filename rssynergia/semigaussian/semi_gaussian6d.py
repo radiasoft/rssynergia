@@ -15,11 +15,16 @@ from base_diagnostics import latticework
 
 def semigaussianbeam6D(opts):
     '''
-    
     Generate a costing KV beam with fixed Hamiltonian and returns the particle array.
     
     Coordinates are chosen with fixed random number generator seed, so that they should always produce the same initial distribution
     for a given emittance.
+    
+    Args:
+        opts (object): Instance of the Synergia options class containing beam and macroparticle information
+    
+    Returns:
+        bunch (ndarray): NumPy array with bunch with values {x, px, y, py, cdt, z, ID} for each particle
     
     '''
 
@@ -27,9 +32,8 @@ def semigaussianbeam6D(opts):
     gamma0 = opts.gamma
     speciesmass = constants.m_p
     dgammaOgamma = 0
-    #We want dpop no dE/E
     dpop = opts.dpop
-    #Assume Gaussian longitudinal profile - put bunch length in m
+    #Assume Gaussian longitudinal profile - put bunch length in meters
     sigmaz = opts.stdz
     num_macro_particles = opts.macro_particles
     
@@ -77,8 +81,6 @@ def semigaussianbeam6D(opts):
         ID = index*lc + np.arange(lc)
         
         coords = np.vstack((coords[:,0],coords[:,1],coords[:,2],coords[:,3],cdtArray,pArray,ID))
-        
-        #coords[idx] = np.append(coords[idx],[cdtArray[idx],pArray[idx],ID])
         
         bunch.append(coords.T)
         

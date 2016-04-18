@@ -4,14 +4,20 @@ from scipy.optimize import newton
 
 class EllipticBeam:
     
+    ''' 
+    Generic class for generating an Elliptic bunch distribution with symmetric lattice functions. 
+    Generates a numpy array for easy output/input into other codes.
+    
+    Args:
+        beta (float): the beta function where the bunch is being matched, defaults to 1
+        betaPrime (float): the derivative of the beta function, defaults to 0
+        t (float): the elliptic potential strength
+        c (float): the elliptic potential c
+            
+    '''
+    
     def __init__(self, _t, _c, _beta, _betaPrime=0.):
-        """ Generate a matched bunch for a fixed emittance
-        Args:
-        t (float) the elliptic potential strength
-        c (float) the elliptic potential c
-        beta (float) the beta function where the bunch is being matched
-        betaPrime (float) the derivative of the beta function, defaults to zero
-        """
+
         self.ellipticT = -1.*_t
         self.ellipticC = _c
         self.beta      = _beta
@@ -44,6 +50,7 @@ class EllipticBeam:
         return hamiltonian
         
     def computepotential(self, xHat, yHat):
+        """Compute the general potential"""
         quadratic = 0.5 * (xHat**2 + yHat**2)
 
         elliptic = 0.
@@ -68,26 +75,24 @@ class EllipticBeam:
         return potential
         
     def whatsleft(self, yHat):
+        """Compute the difference between the emittance and the potential"""
         return self.emittance - self.computepotential(0, yHat)
 
     def generatebunch(self, emittance, nParticles):
         """ Generate a matched bunch with single emittance and number of particles
+        
         Args:
-        emittance (float) the value of fixed H
-        nParticles(int)   the number of particles for the bunch
+            emittance (float) the value of fixed H
+            nParticles(int)   the number of particles for the bunch
         
         Returns:
-        bunch (list)  a list of numpy arrays of 4D phase space, (x, px, y, py)
+            bunch (list)  a list of numpy arrays of 4D phase space, (x, px, y, py)
         """
         
         # Generate some bounds on the transverse size to reduce waste in generating the bunch
         
         # Use the lemming method to find the maximum y
         y0 = np.sqrt(emittance)
-        #dy = 0.01*self.ellipticC
-        #while self.computePotential(0, y0) < emittance:
-        #    print self.computePotential(0,y0)
-        #    y0 += dy
         
         #yMax = y0
         self.emittance = emittance
@@ -122,13 +127,14 @@ class EllipticBeam:
         
     def generatefixedbunch(self, emittance, nParticles, seed):
         """ Generate a matched bunch with single emittance and number of particles
+        
         Args:
-        emittance (float) the value of fixed H
-        nParticles(int)   the number of particles for the bunch
-        seed (int)        the random number generator seed for fixing particle coordinates
+            emittance (float) the value of fixed H
+            nParticles(int)   the number of particles for the bunch
+            seed (int)        the random number generator seed for fixing particle coordinates
         
         Returns:
-        bunch (list)  a list of numpy arrays of 4D phase space, (x, px, y, py)
+            bunch (list)  a list of numpy arrays of 4D phase space, (x, px, y, py)
         """
         
         # Generate some bounds on the transverse size to reduce waste in generating the bunch

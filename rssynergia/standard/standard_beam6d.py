@@ -15,13 +15,16 @@ from base_diagnostics import latticework
 
 
 def toyKVbeam6D(opts):
-    '''
+    '''Generate a costing KV beam with fixed Hamiltonian and returns the particle array.
     
-    Generate a costing KV beam with fixed Hamiltonian and returns the particle array.
+    Coordinates are chosen with fixed random number generator seed, so that they should always 
+    produce the same initial distribution for a given emittance.
     
-    Coordinates are chosen with fixed random number generator seed, so that they should always produce the same initial distribution
-    for a given emittance.
+    Args:
+        opts (object): Instance of the Synergia options class containing beam and macroparticle information
     
+    Returns:
+        bunch (ndarray): NumPy array with bunch with values {x, px, y, py, cdt, z, ID} for each particle
     '''
 
     # Beam parameters
@@ -68,9 +71,7 @@ def toyKVbeam6D(opts):
         
         
         for idx in range(len(coords)):
-            #EArray[idx] = random.gauss(E0, espread)
             pArray[idx] = random.gauss(0, dpop)
-            #tArray[idx] = random.gauss(0., bunchlength)
             cdtArray[idx] = random.gauss(0, sigmaz)
             
             #assign unique index value to each particle

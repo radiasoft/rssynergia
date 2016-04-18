@@ -4,16 +4,17 @@ from scipy.optimize import newton
 
 class SemiGaussianBeam:
     
-    ''' Generic class for generating a bunch distribution with certain properties. Generates a numpy array for easy output/input into other codes.'''
+    """ Generic class for generating a bunch distribution with certain properties. 
+    Generates a numpy array for easy output/input into other codes.
     
-    def __init__(self, _beta=1, _betaPrime=0.):
-        """ Generate a matched bunch for a fixed emittance
-        Args:
+    Args:
         beta (float) the beta function where the bunch is being matched, defaults to 1
         betaPrime (float) the derivative of the beta function, defaults to 0
-        """
-        #self.ellipticT = -1.*_t
-        #self.ellipticC = _c
+    
+    """
+    
+    def __init__(self, _beta=1, _betaPrime=0.):
+        
         self.beta      = _beta
         self.betaPrime = _betaPrime
 
@@ -26,24 +27,26 @@ class SemiGaussianBeam:
         return hamiltonian
         
     def computepotential(self, xHat, yHat):
+        """Compute the general potential"""
         quadratic = 0.5*(xHat**2 + yHat**2)
 
         potential = quadratic
         return potential
         
     def whatsleft(self, yHat):
+        """Return the difference btween the emittance and potential"""
         return self.emittance - self.computepotential(0, yHat)
     
         
     def generatefixedbunch(self, emittance, nParticles, seed):
         """ Generate a matched bunch with RMS emittance and number of particles
         Args:
-        emittance (float) the RMS emittance of the bunch
-        nParticles(int)   the number of particles for the bunch
-        seed (int)        the random number generator seed for fixing particle coordinates
+        emittance (float): the RMS emittance of the bunch
+        nParticles(int): the number of particles for the bunch
+        seed (int): the random number generator seed for fixing particle coordinates
         
         Returns:
-        bunch (list)  a list of numpy arrays of 4D phase space, (x, px, y, py)
+        bunch (list): a list of numpy arrays of 4D phase space, (x, px, y, py)
         """
         
         # Generate some bounds on the transverse size to reduce waste in generating the bunch
@@ -64,15 +67,13 @@ class SemiGaussianBeam:
         
         
         ##Distribute particles as a Gaussian in momentum space - throw out those more than 4 sigma away from mean
-        #w_prime = 1.e-6
         std = 2*emittance/xMax
-        #std = np.sqrt(emit)
         #Create more particles than needed to select from
         px_full = np.random.standard_normal(nParticles*2)*std
         py_full = np.random.standard_normal(nParticles*2)*std
         indices_px = np.where(np.abs(px_full) <= 3.*std)[0][:nParticles]
         indices_py = np.where(np.abs(py_full) <= 3.*std)[0][:nParticles]
-        #Note 
+
         px = np.asarray(px_full[indices_px])
         py = np.asarray(py_full[indices_py])
         
