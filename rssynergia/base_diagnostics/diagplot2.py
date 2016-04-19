@@ -16,6 +16,17 @@ coords['zp'] = 5
 
 #Define Params class
 class Params:
+    '''Basic class for coordinating attributes for Synergia data for plotting and manipulation.
+    Useful as a lookup for pairing diagnostics output.
+    
+    Args:
+        label (str): a label for the parameter in consideration
+        x_attr (str): the x-axis value for plotting (e.g. s)
+        y_attr (str): the y- axis value for plotting (e.g. emitx)
+        y_index1 (Optional[int]): index of y_attr in particle or diagnostics array. Defaults to None.
+        y_index2 (Optional[int]): second index of y_attr in particle or diagnostics array. Defaults to None. 
+    '''
+    
     def __init__(self, label, x_attr, y_attr, y_index1=None, y_index2=None):
         self.label = label
         self.x_attr = x_attr
@@ -26,6 +37,12 @@ class Params:
 
 #generate_plotparams constructs the associated values capable of being plotted
 def generate_plotparams():
+    '''
+    Constructs a fixed dictionary of plotparams objects coordinating plottable values from diagnostics.
+    
+    '''
+    
+    
     plotparams = {}
     for label in coords.keys():
         for label2 in coords.keys():
@@ -50,7 +67,16 @@ def generate_plotparams():
 
 
 def plot_turn(x,yVals,opts,names,betas,length=None):
-    '''Makes plot of x vs. yVals and saves it.'''
+    '''Makes plot of x vs. yVals and saves it.
+    
+    Args:
+        x (array-like): array of x-axis values
+        y (array-like): array of y-axis values
+        opts (options instance): Synergia options instance with metadata for simulation
+        names (list):  a list of names of the coordinates is being plotted
+        length (float): Sets a maximum on the x-axis
+    
+    '''
     
     #if the length is specified, use it as the interval descriptor
     if length:
@@ -80,9 +106,7 @@ def plot_turn(x,yVals,opts,names,betas,length=None):
     for n in names:
         if n.endswith('std'):
             names2.append('$\sigma_{}$'.format(n[1]))
-    
-    #print [n for n in names2]
-    
+
     yNames = ', '.join([n for n in names2])
     plt.ylabel(yNames + ' [mm]', fontsize=14)
     
@@ -93,66 +117,32 @@ def plot_turn(x,yVals,opts,names,betas,length=None):
         
         #newy is the plot holder
         newy = y   
-        #deal with betas
-        if betas and name == '_x_std':
-            newy = makeBeta(y,opts.emits[0])
-            names[index] = '_beta_x' #add underscore b/c the label will be cut
-            #yVals[index] = newy
-        elif betas and name == '_y_std':
-            newy = makeBeta(y,opts.emits[1])
-            names[index] = '_beta_y'
-            #y = newy
-            #yVals[index] = newy
-            
-        #print names       
-        #print "{} : {}".format(index, names2[index])
+
         #add each plot with correct label
-        #This adjusts the plotted x-values to begin at 0
-        #plt.plot(x[st:et]-opts.lattice.get_length()*(opts.start),newy[st:et]*1000, '-', label=names2[index])
         plt.plot(x-opts.lattice.get_length()*(opts.start),newy*1000, '-', label=names2[index])
-        #plt.plot(x[st:et],newy[st:et], '-', label=names[index][1:])
-    #print names
+
     ax = plt.gca()
     
     if not opts.turns:
         ax.set_xlim([0,opts.lattice.get_length()])
     else:
        ax.set_xlim([0,opts.turns*opts.lattice.get_length()])
-    #ymax = 100 #10 mm fixed ymax
-    #ax.set_ylim([0,ymax])    
-    #limit x-axis according to 'length' specification
+
     if length:
         axes = plt.gca()
         axes.set_xlim([0,length])
-        if betas:
-            name = opts.lattice_name+''.join(names)+'_betas.pdf'
-            title_name = 'Estimated RMS betas for lattice ' + opts.lattice_name  
-        else:
-            name = opts.lattice_name+''.join(names)+'.pdf'
-            title_name = yNames + ' for lattice ' + opts.lattice_name
+        name = opts.lattice_name+''.join(names)+'.pdf'
+        title_name = yNames + ' for lattice ' + opts.lattice_name
     
     #plotting based on turn
     elif opts.turns:
-        if betas:
-            #names is a list so have to join with ''
-            sv_name = opts.lattice_name+''.join(names)+'_turns'+str(opts.start)+'-'+str(opts.start+opts.turns)+'_betas.pdf'
-            title_name = 'Estimated RMS betas for lattice ' + opts.lattice_name+': Turns '+str(opts.start+1)+'-'+str(opts.start+1+opts.turns)
-        
-        else:
-            sv_name = opts.lattice_name+''.join(names)+'_turn'+str(opts.start)+'-'+str(opts.start+opts.turns)+'.pdf'
-            title_name = yNames + ' for lattice ' + opts.lattice_name+': Turns '+str(opts.start)+'-'+str(opts.start+opts.turns)
-        
+        sv_name = opts.lattice_name+''.join(names)+'_turn'+str(opts.start)+'-'+str(opts.start+opts.turns)+'.pdf'
+        title_name = yNames + ' for lattice ' + opts.lattice_name+': Turns '+str(opts.start)+'-'+str(opts.start+opts.turns)
             
     #just plot 1 turn based on the starting position
     else:
-        if betas:
-            #names is a list so have to join with ''
-            sv_name = opts.lattice_name+''.join(names)+'_turn'+str(opts.start+1)+'_betas.pdf'
-            title_name = 'Estimated RMS betas for lattice ' + opts.lattice_name+': Turn '+str(opts.start+1)
-        
-        else:
-            sv_name = opts.lattice_name+''.join(names)+'_turn'+str(opts.start+1)+'.pdf'
-            title_name = yNames + ' for lattice ' + opts.lattice_name+': Turn '+str(opts.start+1)
+        sv_name = opts.lattice_name+''.join(names)+'_turn'+str(opts.start+1)+'.pdf'
+        title_name = yNames + ' for lattice ' + opts.lattice_name+': Turn '+str(opts.start+1)
     
     plt.legend(loc='best', fontsize=16)
     plt.title(title_name, y=1.02, fontsize=16)    
@@ -195,14 +185,12 @@ def getPlotVals(filename, plots):
     
     return plotVals
 
-def diagPlot(opts, start=None, betas=False, length=None):
-    '''Runs the plotting function to create a plot
+def diagPlot(opts, start=None, length=None):
+    '''Runs the plot_turn function to create a plot
     
     Arguments:
-        -opts - An instance of options.Options from the base_diagnostics module
-            -Must specify: input_file, lattice_name, lattice_simulator, start (starting turn #)
-        -betas (optional) - will roughly estimate corresponding betas for linear lattice
-        -length (optional) - will fix the lattice length based on this # rather than the lattice length
+        opts (options.Options): An instance of the Synergia options class -Must specify: input_file, lattice_name, lattice_simulator, start (starting turn #)
+        length (Optional[float]): fixes the endpoint of the plot (default is lattice length)
     '''
 
     #get plot values dictionary
@@ -229,9 +217,4 @@ def diagPlot(opts, start=None, betas=False, length=None):
     #just call for the first x variable - all should be parameterized by 's' for now
     xmaster = plotVals['s']
     
-    print "The length of the output is {} for x and {} for y.".format(len(xmaster), len(np.asarray(yVals)[0]))
-    print "The number of steps per turn is {}.".format(opts.steps)
-    print "By comparison, {} is the number of slices of the lattice simulator".format(len(opts.lattice_simulator.get_slices()))
-    print "Thus we have {} turns in the basic.h5 file.".format(len(xmaster)/opts.steps)
-    
-    plot_turn(xmaster,yVals,opts,nms, betas, length)
+    plot_turn(xmaster,yVals,opts,nms, length)
