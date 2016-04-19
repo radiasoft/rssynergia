@@ -1,10 +1,27 @@
 import sys
 
-#Options class definition - All other diagnostics will make use of this class or subclasses
-
-#To Do: Make some subclasses with more specific options for different plots
-
 class Options:
+    """
+    A class designed to handle a fixed set of arguments shared across Synergia simulation and analysis tools.
+    
+    This iteration of the Options class draws on the Synergia Options class, and is meant to be broadly
+    applicable for running Synergia simulations, and for providing relevant keyword arguments for processing
+    diagnostic outputs and analysis tools for these simulations.
+    
+    The initializaiton of this class requires no arguments, and provides fixed initial values for a host
+    of parameters.
+    
+    Initial parameter list:
+        - hist, plots, inputfile, outputfile, show, hcoord, vcoord, bins. minh, maxh, minv, maxv, contour,
+        num_countour, lattice_name, save, ID, path, norm, variance, relpath, lattice_simulator, num, scale
+        turns, plot_lost, elliptic
+        
+    The class currently supports the creation of new attributes through the class method set_new(), which wraps
+    Python's own setattr to provide fixed applicability towards class construction.
+    
+    
+    """
+    
     def __init__(self):
         self.hist = False
         self.plots = 1
