@@ -9,16 +9,18 @@ import matplotlib.pyplot as plt
 
 
 def plot_distribution(arr, numBins, norm=False):
-    '''Construct a histrogram, then plot the resulting distribution
+    '''Construct a histrogram, then plot the resulting distribution.
     
     Arguments:
-        arr - 1D array for binning
-        numbins - # of bins for histogram
+        arr (array-like): 1D array for binning
+        numbins (int): # of bins for histogram
         
-        (optional) norm - normalization flag (default False)
+        (optional) norm: normalization flag (default False)
     
-    Constructs a matplotlib plot and returns it. 
-    Automatically displayed when using IPython backend.
+    Returns:
+        fig (matplotlib.figure.Figure): - a matplotlib figure handle
+    
+    Constructs a matplotlib plot and returns it. Automatically displayed when using IPython backend.
     
     '''
     
@@ -29,7 +31,6 @@ def plot_distribution(arr, numBins, norm=False):
     myVals_norm = myVals/(np.max(myVals)*1.0)
     
     #Set some matplotlib standards for plots 
-    #mpl.rcParams['font.size': 14]
     mpl.rcParams['figure.figsize'] = 8, 6
     
     fig = plt.figure()
@@ -49,10 +50,14 @@ def get_distribution(arr, numBins, norm = True):
     '''Construct a histrogram, and return the resulting distribution.
     
     Arguments:
-        arr - 1D array for binning
-        numbins - # of bins for histogram
+        arr (array-like): 1D array for binning
+        numbins (int): # of bins for histogram
         
-        (optional) norm - normalization flag (default False)
+        (optional) norm: normalization flag (default False)
+    
+    Returns:
+        bincenters (ndarray): array of bincenter positions
+        myVals (ndarray): array of histrogram values
     
     '''
     
@@ -75,19 +80,20 @@ def plot_both(z, f_goal, f_actual):
     Plot two distributions with the same horizontal coordinates. Constructs a matplotlib 
     plot and returns it. Automatically displayed when using IPython backend.
         
-    Parameters
-    ----------
-    z: 1darray of floats (micron)
-        Array of the longitudinal coordinate shared between both dependant variables
+    Arguments:
+        z (ndarray): 1darray of floats (micron) - Array of the longitudinal coordinate shared between both dependant variables
 
-    f_goal, f_actual: unitless
-        Distribution values at each z coordinate. f_goal corresponds to the desired
-        distribution, while f_actual corresponds to the extracted distribtution.
+        f_goal (ndarray): 1D array corresponding to values of the desired distribution at each z coordinate
+        f_actual (ndarray): 1D array corresponding to values of the actual distribution at each z coordinate
     
+    Returns:
+        fig (matplotlib.figure.Figure): - a matplotlib figure handle
+    
+    Constructs a matplotlib plot and returns it. Automatically displayed when using IPython backend.
+        
     '''
     
     #Set some matplotlib standards for plots 
-    #mpl.rcParams['font.size': 14]
     mpl.rcParams['figure.figsize'] = 8, 6
     
     fig = plt.figure()
