@@ -6,12 +6,15 @@ import matplotlib as mpl
 from matplotlib import gridspec
 
 #RC stuff
-mpl.rc('axes', labelsize=12, titlesize=16)
+#mpl.rc('axes', labelsize=12, titlesize=16)
 
 
 def check_grid_spec():
+    '''Constructs a plot illustrating Matplotlib grid spec alignment.
     
-    '''A quick plot for showing the grid spec alignment'''
+    This is a utility function.
+    
+    '''
     
     fig = plt.figure(figsize=(16,8))
     gs = gridspec.GridSpec(2, 2, width_ratios=[1,1,1])
@@ -32,9 +35,16 @@ def check_grid_spec():
 
 
 def plot_bunch(bunch):
-    
     '''
-    Plot the coordinate space and x, y phase spaces of a synergia bunch
+    Plot the coordinate space and x, y phase spaces of a Synergia bunch.
+    
+    List of plots: x-y, x-x', y-y'
+    
+    Arguments:
+        bunch (synergia.bunch.bunch): A Synergia bunch object.
+        
+    When used with an IPython backend, figure should be displayed.
+        
     '''
     
     #get particle properties from bunch
@@ -87,7 +97,14 @@ def plot_bunch(bunch):
 
 def plot_long(bunch):
     '''
-    Plot the longitudinal coordinate and phase space of the bunch
+    Plot the longitudinal coordinate and phase spaces of a Synergia bunch.
+
+    List of plots: x-y, z-z', z-y
+    
+    Arguments:
+        bunch (synergia.bunch.bunch): A Synergia bunch object.
+        
+    When used with an IPython backend, figure should be displayed.
     '''
     
     #get particle properties from bunch
@@ -141,7 +158,19 @@ def plot_long(bunch):
 
 
 def plt_bunch_dpop(bunch,opts,lost=None):
-    '''A plotting script displaying different phase space plots - able to be split up by dpop'''
+    '''A plotting script displaying different phase space plots - able to be split up by dpop
+    
+    List of plots: x-y, x'-y', x-x', y-y'
+    
+    Arguments:
+        bunch (synergia.bunch.bunch): A Synergia bunch object.
+        opts (options.Options): A Synergia options instance specifying dpop list, lattice name, turn #, etc.
+        lost (Optional[bool]): If 
+        
+    When used with an IPython backend, figure should be displayed. If opts.save is specified,
+    then it should write each plot to a file.    
+    
+    '''
     
     
     if lost:
@@ -153,8 +182,6 @@ def plt_bunch_dpop(bunch,opts,lost=None):
     
     coord_max = 2.*max([np.max(np.abs(myParticles[:,0])),np.abs(np.max(myParticles[:,2]))])
     mom_max  = 2.*max([np.max(np.abs(myParticles[:,1])),np.max(np.abs(myParticles[:,3]))])
-    
-    #print "{} is coord max and {} is momentum max".format(coord_max,mom_max)
     
     #for index,val in enumerate(opts.dpops):
     for index,val in enumerate(opts.dpops):

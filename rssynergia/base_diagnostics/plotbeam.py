@@ -6,8 +6,6 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import options
-#from mpl_toolkits.axes_grid import make_axes_locatable
-#from mpl_toolkits import axes_grid
 
 coords = {}
 coords['x'] = 0
@@ -19,9 +17,16 @@ coords['dpop'] = 5
 coords['id'] = 6
 
 
-def plotbeam(opts, particles,header):
+def plotbeam(opts, particles, header):
 
-    '''Returns a 2D plot of particle distribution in the choosen coordinate space'''
+    '''Returns a 2D plot of particle distribution in the choosen coordinate space
+    
+    Arguments:
+        opts (options.Options): A Synergia options instance 
+        particles (ndarray): An array of particles, organized according to the coords dictionary
+        header (dict): A Python dictionary with metadata for the particle array
+    
+    '''
 
     h = particles[:,coords[opts.hcoord]]
     v = particles[:,coords[opts.vcoord]]
@@ -51,7 +56,13 @@ def plotbeam(opts, particles,header):
 
 def get_particles(opts):
     
-    '''Reads an input file and returns a numpy array of particles and a dictionary of root values'''
+    '''
+    Reads an input file and returns a numpy array of particles and a dictionary of root values
+    
+    Arguments:
+        opts (options.Options): A Synergia options instance
+    
+    '''
     
     f = tables.openFile(opts.inputfile, 'r')
     particles = f.root.particles.read()
@@ -76,8 +87,13 @@ def get_particles(opts):
     
 
 def plot_beam(opts):
+    '''
+    Plot a beam of particles given an options object input.
     
-    '''Plot a beam of particles given an options object input.'''
+    Arguments:
+        opts (options.Options): A Synergia options instance
+    
+    '''
     
     header, particles = get_particles(opts)
 
