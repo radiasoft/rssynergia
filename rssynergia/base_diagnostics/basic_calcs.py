@@ -9,7 +9,15 @@ import os
 import matplotlib.pyplot as plt
 
 def params(mass,kE):
-    '''return dictionary of values relating momentum, gamma, etc for a given input mass and energy'''
+    '''
+    Return dictionary of values relating momentum, gamma, etc for a given input mass and energy
+    
+    Args:
+        mass (float): mass of the particle in GeV
+        kE (float): kinetic energy of particle
+    
+    
+    '''
     vals = {}
     vals['units'] = 'GeV'
     vals['mass'] = mass
@@ -26,7 +34,16 @@ def params(mass,kE):
     
     
 def get_rms_envelope(dim, particles):
-    '''Returns the rms beam size in a given dimension'''
+    '''Returns the rms beam size in a given dimension
+    
+    Args:
+        dim (str): dimension of calculation ('x','y')
+        particles (ndarray): array of particles of the form (x,px,y,py)
+    
+    Returns:
+        sig_w (float): RMS value of beam envelop in the desired dimension
+    
+    '''
     
     if dim == 'x':
         ind = [0,1]
@@ -39,17 +56,22 @@ def get_rms_envelope(dim, particles):
     w = particles[:,ind[0]]
     p_num = w.shape[0]
     sig_w = np.sqrt(np.sum(w**2)/p_num)
-    
-    #w_prime = particles[:,ind[1]]
-    #sig_w_prime = np.sqrt(np.sum(w_prime**2)/p_num)
-    
-    #there could be a factor of 2 here that needs to be included, depending on convention!
-    
+        
     return  sig_w 
     
     
 def get_emittance(dim, bunch):
-    '''Returns the statistical emittance (in x or y) of a bunch which centered at (0,0) and not rotated with respect to the x-y axes'''
+    '''Returns the statistical emittance (in x or y) of a bunch  
+    centered at (0,0) and not rotated with respect to the x-y axes.
+
+    Args:
+        dim (str): dimension of calculation ('x','y')
+        particles (ndarray): array of particles of the form (x,px,y,py)
+    
+    Returns:
+        emittance (float): RMS emittance value in the desired dimension   
+    
+    '''
     
     if dim == 'x':
         ind = [0,1]
@@ -68,32 +90,62 @@ def get_emittance(dim, bunch):
     
     sig_w_prime = np.sqrt(np.sum(w_prime**2)/p_num)
     
-    #there could be a factor of 2 here that needs to be included, depending on convention!
-    
     return  sig_w * sig_w_prime
 
 
 def get_normalized_emittance(dim, bunch, beta, gamma):
+    '''Return the normalized emittance of a bunch given relativistic beta and gamma
+    
+    Args:
+        dim (str): dimension of calculation ('x','y')
+        bunch (ndarray): array of particles of the form (x,px,y,py)
+        beta (float): rleativistic beta of bunch
+        gamma (float): relativistic gamma of bunch
+    
+    Returns:
+        n_emit (float): RMS normalized emittance value in the desired dimension       
+
+    '''
     
     return get_emittance(dim, bunch)*(beta*gamma)
     
 def calc_geometric_emittance(norm_emit,beta,gamma):
-    '''Return the geometric emittance given a normalized emittance value and a beta/gamma.'''
+    '''Return the geometric emittance given a normalized emittance value and a beta/gamma.
+
+    Args:
+        norm_emit (float): a normalized emittance value
+        beta (float): rleativistic beta of bunch
+        gamma (float): relativistic gamma of bunch
+    
+    Returns:
+        g_emit (float): RMS geometric emittance value
+        
+    '''
     
     return norm_emit/(beta*gamma)
     
 def calc_normalized_emittance(g_emit,beta,gamma):
-    '''Return the normalized emittance given a geometric emittance value and a beta/gamma.'''
+    '''Return the normalized emittance given a geometric emittance value and a beta/gamma.
+    
+    Args:
+        g_emit (float): a geometric emittance value
+        beta (float): rleativistic beta of bunch
+        gamma (float): relativistic gamma of bunch
+    
+    Returns:
+        norm_emit (float): RMS normalized emittance value
+    
+    '''
     
     return g_emit*(beta*gamma)
 
 
 def calc_properties(bunch,ref):
-    '''Return an array of different bunch properties
+    '''Print a list of different bunch properties
     
-    Arguments:
-    bunch - a Synergia bunch
-    ref - a Synergia reference particle
+    Args:
+        bunch (synergia.bunch.bunch): a Synergia bunch object
+        ref (synergia.foundation.reference_particle): a Synergia reference particle object
     
     '''
     
@@ -151,17 +203,26 @@ def calc_properties(bunch,ref):
     print "total geometric emittance y: {} mm-mrad".format(emit_total_y*1.e6)
 
 
-def get_base_nll(nn, l0, mu0, t, c):
+def get_base_nll(l0, mu0, t, c):
     '''Construct the nonlinear element. Taken from madx script by A. Valishev. 
     Verified by David's python script for pyOrbit.
     
+    Args:
+        l0 (float): length of nonlinear drift section
+        mu0 (float): tune advance (phase/2pi) through the drift section
+        t (float): nonlinear magnet strength parameter
+        c (float): nonlinear magnet aperture parameter
+    
+    Returns:
+        f0, betae, alphae, betas: array of values - focal length, entrance beta, entrance alpha,
+                                  beta at middle of NL drift
+    
     '''
-    #musect=mu0+0.5;
+
     f0=l0/4.0*(1.0+1.0/np.tan(np.pi*mu0)**2); #focal length
     betae=l0/np.sqrt(1.0-(1.0-l0/2.0/f0)**2); #entrance beta function
     alphae=l0/2.0/f0/np.sqrt(1.0-(1.0-l0/2.0/f0)**2); #entrance alpha function
     betas=l0*(1-l0/4.0/f0)/np.sqrt(1.0-(1.0-l0/2.0/f0)**2); #middle beta function
-    #value,f0,betae,alfae,betas;
     
     return [f0, betae,alphae,betas]
 
