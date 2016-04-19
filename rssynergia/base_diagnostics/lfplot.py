@@ -13,11 +13,16 @@ import options
 
 def lf_plot(lf_info, opts):
     '''
-        Plot lattice functions on same plot
+        Plot a set of lattice functions on the same figure.
+        
+        This function takes an array "lf_info" of dictionaries, with each dictionary containing lattice
+        function information that is accessable by keys (e.g. "beta_x"). It then plots the lattice functions
+        that are specified in opts.lf_fns.
         
         Arguments:
-        lf_info - array of lattice element dictionaries, each containing lattice functions
-        opts - Options object with plot options (including lattice, lattice_simulator, etc)
+            lf_info (array-like): array of lattice element dictionaries, each containing position and 
+                                    lattice function information
+            opts (options.Options): Options object with plot options (e.g. opts.lf_fns specifying which plots)
 
     '''
 
@@ -71,48 +76,18 @@ def lf_plot(lf_info, opts):
 
 ########################################### Getters ###############################################
 
-def get_lf_fns(lattice, lattice_simulator):
-    '''
-    Return the lattice functions for every element in the lattice, assuming periodicity
-    '''
-    #define the lattice function names
-    lf_names = ("beta_x", "alpha_x", "beta_y", "alpha_y", 
-            "psi_x", "psi_y","D_x", "Dprime_x", "D_y", "Dprime_y")
-    #construct an empty array of dictionaries corresponding to each lattice element
-    lf_info = [{}]
-    #loop through lattice elements
-    index=0
-    for element in lattice.get_elements():
-        index += 1
-        #get lattice functions for a given element
-        lattice_functions = lattice_simulator.get_lattice_functions(element)
-        #define dictionary for this element
-        lf = {}
-        lf['name'] = element.get_name()
-        lf['s'] = lattice_functions.arc_length
-        lf['length'] = element.get_length()
-        #loop through lattice functions for the element
-        for lfname in lf_names:
-            lf[lfname] = getattr(lattice_functions,lfname)
-        #append individual element to array
-        lf_info.append(lf)
-        
-    #construct initial element lf_info[0]
-    lf_info[0]['s'] = 0.0
-    lf_info[0]['name'] = lattice.get_name()
-    lf_info[0]['length'] = 0.0
-    lf_info[0]['psi_x'] = 0.0
-    lf_info[0]['psi_y'] = 0.0
-    #Take lattice functions from the final element to ensure periodicity
-    for lfname in lf_names:
-        lf_info[0][lfname] = lf_info[-1][lfname]
-        
-    return lf_info
-
-
 def get_sliced_lf_fns(lattice, lattice_simulator):
     '''
-    Return the lattice functions for every slice in the lattice simulator, assuming periodicity
+    Return the lattice functions for every slice in the lattice simulator, assuming periodicity.
+    
+    Arguments:
+        lattice (Synergia.lattice.lattice): A Synergia lattice object
+        lattice_simulator (Synergia.lattice.lattice): Synergia lattice simulator object        
+    
+    Returns:
+        lf_info (dict): An array indexed by element number containing a dictionary of the lattice
+                        element and its lattice functions.
+    
     '''
     #define the lattice function names
     lf_names = ("beta_x", "alpha_x", "beta_y", "alpha_y", 
@@ -154,30 +129,15 @@ def get_sliced_lf_fns(lattice, lattice_simulator):
         
 
 def plot_sliced_lattice_functions(opts):
-    '''Plots the lattice functions for a desired lattice simulator, specified by opts parameters.'''
+    '''Plots the lattice functions for a desired lattice simulator, specified by opts parameters.
+    
+    Arguments:
+        opts (options.Options): A Synergia options instance that specifies the lattice, lattice simulator
+                                 and any necessary plotting options.
+    
+    '''
     
     lf_array = get_sliced_lf_fns(opts.lattice, opts.lattice_simulator)
     
     lf_plot(lf_array, opts)     
     
-    
-
-def plot_lattice_functions(opts):
-    
-    '''Plots the lattice functions for a desired lattice, specified by opts parameters.'''
-    
-    lf_array = get_lf_fns(opts.lattice, opts.lattice_simulator)
-    
-    lf_plot(lf_array, opts)   
-
-    
-if __name__ == '__main__':
-    
-    #handle arguments
-    lattice = sys.argv[0]
-    #define lattice functions being plotted - s is always independent coordinate
-    lf_fns = sys.argv[1:]
-    
-    #get lattice function array
-    lf_array = get_lf_fns(lattice)
-    lf_plot(lf_array, lf_fns)
