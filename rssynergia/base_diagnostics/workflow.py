@@ -8,8 +8,17 @@ import synergia_workflow
 def make_opts(name, order, outputdir, steps, steps_per_element, **kwargs):
     '''A quick function for defining a Synergia options object for map propagator comparisons.
     
-    Takes **kwargs input. Currently, the outputdir argument is deprecated.
+    Args:
+        name (str): name associated with Options object
+        order (str): map order for lattice simulator construction
+        outputdir (str): output directory for simulation diagnostics
+        steps (int): number of steps per turn for constructing stepper
+        steps_per_element (int): number of steps per element
     
+    Takes **kwargs input. 
+    
+    Returns
+        opts (object): options object for Synergia simulations
     
     '''
 
@@ -73,7 +82,12 @@ def make_opts(name, order, outputdir, steps, steps_per_element, **kwargs):
     return opts
 
 def make_path(dirname):
-    '''Create a directory with the specified name - avoid race conditions if possible'''
+    '''Create a directory with the specified name - avoid race conditions if possible
+    
+    Args:
+        dirname (str): name of directory to be constructed
+    
+    '''
 
     try:
         os.makedirs(dirname)
@@ -88,8 +102,8 @@ def make_path(dirname):
 def cleanup(dirname):
     '''Cleanup files after run and move diagnostic outputs to proper directory.
     
-    Arguments:
-        -dirname: This is the relative path - e.g. full path = pwd + dirname
+    Arguments
+        dirname (str): This is the relative path - e.g. full path = pwd + dirname
     
     '''
     curdir = os.getcwd()
@@ -113,7 +127,7 @@ def cleanup(dirname):
 
                     
 def log_input(opts):
-    '''Write an output file containing necessary simulation parameters for reproduction'''
+    '''DEPRECATED: Write an output file containing necessary simulation parameters for reproduction'''
     
 
     
