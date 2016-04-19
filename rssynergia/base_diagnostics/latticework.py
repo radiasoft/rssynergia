@@ -3,16 +3,23 @@ import synergia
 from mpi4py import MPI
 import synergia_workflow
 import numpy as np
+from base_diagnostics import workflow
 
 
 def get_phase_advance(ls, ele0, ele1, x=True):
     '''
     Returns the phase_advance between two elements in a lattice, given a fixed lattice simulator construction.
+    Also prints the position of each element and Dispersion in the x-plane at that position.
     
     Arguments:
-        -ls - lattice simulator
-        -ele0 - first element name 
-        -ele1 - second element name
+        ls (synergia.simulation.lattice_simulator): A Synergia lattice simulator object
+        ele0 (str): first element name 
+        ele1 (str): second element name
+        x (Optional[bool]): Whether to look at x phase (True) or y phase (False). Defaults to True. 
+        
+    Returns:
+        advance (float): the phase advance between ele0 and ele1. 
+        
         
     Assumptions:
         - Elements ele0 and ele1 must be unique!
@@ -23,19 +30,6 @@ def get_phase_advance(ls, ele0, ele1, x=True):
     #starting null values
     e0check = False
     e1check = False
-    
-    #for ele in ls.get_lattice().get_elements():
-    #    if ele.get_name() == ele0:
-    #        e0 = ele
-    #    if ele.get_name() == ele1:
-    #        e1 = ele
-            
-    #if not e0:
-    #    print "Cannot find element: {}".format(ele0)
-    #    return 0
-    #elif not e1:
-    #    print "Cannot find element: {}".format(ele1)
-    #    return 0
             
     parts = ls.get_slices()
     arclengths = [ls.get_lattice_functions(part).arc_length for part in parts]
@@ -90,17 +84,32 @@ def get_phase_advance(ls, ele0, ele1, x=True):
     return advance
     
 
-def make_drift(length):
+def make_drift(l):
+    """Construct the idealized 6x6 R-matrix for a drift of length l.
+    Dispersive components (R-56) are not included.
+    
+    Arguments:
+        l (float): length of the drift
+    
+    Returns:
+        drift_R (ndArray): A 6x6 matrix
+    """
 
     drift_R = np.identity(6)
-    drift_R[0,1] += length
-    drift_R[2,3] += length
-    #Include the 5-6 component for completeness
+    drift_R[0,1] += l
+    drift_R[2,3] += l
     
     return drift_R
 
 def make_R(f):
-    '''Make an R-matrix focussing in both planes to simulate the IOTA lattice outside of the NLL elements'''
+    '''Constructs a 6x6 R-matrix focussing in both planes with focal length f.
+    
+    Arguments:
+        f (float): focal length in each plane.
+    
+    Returns:
+        m_R (ndArray): A 6x6 matrix
+    '''
     mat_R = np.identity(6)
     mat_R[1,0] -= 1/f
     mat_R[3,2] -= 1/f
@@ -108,6 +117,16 @@ def make_R(f):
     return mat_R
 
 def make_quad(k,l,K=None):
+    """Constructs a 6x6 R-matrix for a quadrupole element.
+    
+    Arguments:
+        k (float): graident of the focusing fields
+        l (float): length of the magnet
+        K (Optional[float]): integrated strength of the magnet. Overrides k,l inputs. Defaults to None.
+    
+    Returns:
+        quad_R (ndArray): A 6x6 matrix
+    """
     
     if K:
         quad_R = np.identity(6)
@@ -159,13 +178,14 @@ def get_fd_quads(lattice):
     return (f_quads, d_quads)
     
 def get_sextupoles(lattice, nonzero=True):
-    '''Return a list of positive and negative sextupoles
+    '''Return a list of positive and negative sextupoles from a given Synergia lattice.
     
     Arguments
-        lattice - Synergia lattice object
-        nonzero (optional) - Flag for returning only sextupoles with nonzero values
+        lattice (Synergia.latttice.lattice): A Synergia lattice object
+        nonzero (Optional[bool]): True if returning only sextupoles with nonzero values. Defaults to True.
         
-    Outputs a pair of lists -  ( [list of positive sextupoles], [list of negative sextupoles] )
+    Returns:
+    (p_six, n_six) : a length-2 tuple containing lists of positive and negative sectupoles
     
     '''
     
@@ -198,16 +218,12 @@ def get_sextupoles(lattice, nonzero=True):
  
     return (p_six, n_six)
 
-
-#quick helper method
 def print_strengths(elemslist, unique=True):
-    '''Print the strengths of quads/sextupoles from a list of lattice elements
+    '''Print the strengths of quads/sextupoles from a list of lattice elements.
     
     Arguments:
-        elemslist - the list of elements (from lattice.get_elements() usually)
-        
-    Optional:
-        unique - (defaults to True) print only unique elements
+        elemslist(list): a list of Synergia lattice elements (from lattice.get_elements() usually)
+        unique (Optional[bool])- If True, print only unique elements. Defaults to True.
     
     '''
     strengths = []
@@ -239,18 +255,19 @@ def print_strengths(elemslist, unique=True):
                 print elem.get_name() + ' K2: ' + str(elem.get_double_attribute("k2"))             
 
 
-def get_unique_elements(lattice, autodrifts = None):
+def get_unique_elements(lattice, autodrifts = False):
     '''
-    Return a dictionary of unique elements in the lattice
+    Return a dictionary of unique elements in the lattice.
     
-    This will be a subset of lattice.get_elements(), the dictionary is index-able by element name.
+    This is essentially a subset of lattice.get_elements(), the dictionary is index-able by element name.
     
     Arguments:
+        lattice (Synergia.lattice.lattice): A synergia lattice object
+        autodrifts (Optional[bool]): If True, includes the auto-generated drift elements. Defaults to False. 
+
     
-    -lattice - the synergia lattice object
-    
-    -autodrifts (default None) - specify this flag to include the drifts created by 
-    synergia to automatically bridge elements in a sequence.
+    Returns: 
+        subelems_dict (dict): A dictionary of lattice element objects with element names as keys.
     
     '''
     
@@ -269,7 +286,7 @@ def get_unique_elements(lattice, autodrifts = None):
                 subelems.append(elem)
                 enames.append(name)
             else:
-                if autodrifts: #only append auto drifts if flag specified
+                if autodrifts == True: #only append auto drifts if flag specified
                     subelems_dict[str(name)] = elem
                     subelems.append(elem)
                     names.append(name)    
@@ -277,87 +294,24 @@ def get_unique_elements(lattice, autodrifts = None):
     return subelems_dict
     
 
-###################### Chromaticity Correction Script ####################################
-from base_diagnostics import workflow
-
-def DEPRECATED_adjust_chromaticity(lattice, maglist,):
-
-    '''This guy is very much a work in progress!'''
-
-    #Get the uncorrected lattice!
-    adjusted_lattice_simulator = stepper2.get_lattice_simulator()
-    adjusted_lattice = adjusted_lattice_simulator.get_lattice()
-
-    cy_orig = adjusted_lattice_simulator.get_vertical_chromaticity()
-    cx_orig = adjusted_lattice_simulator.get_horizontal_chromaticity()
-
-    cx_goal = cy_orig
-    cy_goal = cy_orig
-
-    c_tol = 1.0e-5; #need to define a tolerance for the fit
-
-
-    #grab the sextupoles which are being used (nonzero) in the chromaticity corrected lattice
-    p_six_c, n_six_c = latticework.get_sextupoles(lattice)
-    p_six_use = [ele.get_name() for ele in p_six_c if ele.get_double_attribute("k2") > 0]
-    n_six_use = [ele.get_name() for ele in n_six_c if ele.get_double_attribute("k2") < 0]
-
-    #print the original strengths of the things that will be adjusted
-    #print [": ".join([ele.get_name(), str(ele.get_double_attribute("k2"))]) for ele in p_six_c]
-    #print [": ".join([ele.get_name(), str(ele.get_double_attribute("k2"))]) for ele in n_six_c]
-
-    #grab the sextupoles from the adjusted lattice
-    p_six, n_six = latticework.get_sextupoles(adjusted_lattice)
-
-    #filter to make sure we only keep the ones that we want to adjust
-    p_s = [ele for ele in adjusted_lattice.get_elements() if ele.get_name() in p_six_use]
-    n_s = [ele for ele in adjusted_lattice.get_elements() if ele.get_name() in n_six_use]
-
-    #use these magnets to adjust the chromaticity
-    adjusted_lattice_simulator.adjust_chromaticities(cx_goal,cy_goal,p_s,n_s,c_tol)
-
-    #update the lattice
-    adjusted_lattice_simulator.update()
-    adjusted_lattice = adjusted_lattice_simulator.get_lattice()
-
-    #Force define original lattice simulator
-    lattice2 = synergia.lattice.MadX_reader().get_lattice("iota", "/Users/ncook/Synergia_Tests/lattices/Iota6-6/lattice_2IO.madx")
-    stepper2 = synergia.simulation.Independent_stepper_elements(lattice2, opts.map_order, opts.steps_per_element)
-    lattice_simulator2 = stepper2.get_lattice_simulator()
-
-
-    #Print stuff for original lattice
-    print "Original horizontal chromaticity: {}".format(lattice_simulator2.get_horizontal_chromaticity())
-    print "Original vertical chromaticity: {}".format(lattice_simulator2.get_vertical_chromaticity())
-
-    #print the original strengths of the things that will be adjusted
-    p_six_orig, n_six_orig = latticework.get_sextupoles(lattice2)
-    latticework.print_strengths(p_six_orig, False)
-    latticework.print_strengths(n_six_orig, False)
-
-    print ""
-    #Print stuff for new re-tuned lattice
-    print "New horizontal chromaticity: {}".format(adjusted_lattice_simulator.get_horizontal_chromaticity())
-    print "New vertical chromaticity: {}".format(adjusted_lattice_simulator.get_vertical_chromaticity())
-    p_six_new, n_six_new = latticework.get_sextupoles(adjusted_lattice)
-    latticework.print_strengths(p_six_new, False)
-    latticework.print_strengths(n_six_new, False)
-    #print [": ".join([ele.get_name(), str(ele.get_double_attribute("k2"))]) for ele in p_six_new]
-    #print [": ".join([ele.get_name(), str(ele.get_double_attribute("k2"))]) for ele in n_six_new]
-
-
-
+###################### Chromaticity Correction Scripts ####################################
 
 def chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
     '''
-    Adjust a lattice to meet a desired chromaticity goal in each plane
+    Adjust a lattice to meet a desired chromaticity goal in each plane.
+    
+    Computes a cost equal to the sum of squared values of sexutpole strengths for the combined
+    list of sextupole strengths, prints that cost, and returns it.
     
     Arguments:
-        l_s - Synergia lattice simulator object
-        p_list - list of positive sextupole lattice element names which should be varied
-        n_list - list of negative sextupole lattice element names which should be varied 
-        cx - goal value for horizontal chromaticity
-        cy (optional) - goal value for vertical chromaticity (default cy = cx)
+        l_s (Synergia.lattice.lattice): Synergia lattice simulator object
+        p_list (list): list of positive sextupole lattice element names which should be varied
+        n_list (list): list of negative sextupole lattice element names which should be varied 
+        cx (float): goal value for horizontal chromaticity
+        cy (Optional[float]) - goal value for vertical chromaticity. Default value is cy=cx.
+        
+    Returns:
+        cost (float): The sum of squared values of sextupole strengths across the list of sextupoles strengths.
     '''
     
     c_tol = 1.e-3
@@ -398,7 +352,18 @@ def chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
 
 ########################### Compare lattice functions at entrance##############################
 def get_starting_lf(lattice_simulator):
-    '''Return the lattice functions at the starting position of the lattice simulator'''
+    '''Return the lattice functions at the starting position of the lattice simulator
+    
+    Arguments:
+        lattice_simulator (Synergia.simulation.lattice_simulator): A Synergia lattice simulator object
+        
+    Returns:
+        lf.betax: beta functions in the x plane as calculated by the lattice simulator
+        lf.betay: beta functions in the y plane as calculated by the lattice simulator
+        lf.alphax: alpha functions in the x plane as calculated by the lattice simulator
+        lf.alphay: alpha functions in the y plane as calculated by the lattice simulator
+    
+    '''
     
     
     slices = lattice_simulator.get_slices()
@@ -411,6 +376,19 @@ def get_starting_lf(lattice_simulator):
 
 ###########################Set up stepper and lattice simulator##############################
 def generate_stepper(lattice, coll_operator, opts):
+    """
+    Generates and returns a Synergia stepper given a lattice object and a sequence of options.
+    
+    Arguments:
+        lattice (Synergia.lattice.lattice): A Synergia lattice object
+        coll_operator (Synergia.simulaton.operator): A Synergia collective operator object. May be a dummy operator.
+        opts (options.Options): A Synergia options instance
+        
+    Returns:
+        stepper (Synergia.simulation.stepper): A Synergia stepper object
+    
+    """
+
 
     requested_stepper = opts.stepper
 
@@ -439,15 +417,27 @@ def generate_stepper(lattice, coll_operator, opts):
 
 ###########################Lattice element string adjustment##############################
 def set_lattice_element_type(lattice, opts):
+    """
+    Adjusts the string attributes of each element in the lattice to reflect the desired extraction type and propagation type.
+    May also be used to set an aperture for all elements.
+    
+    
+    Arguments:
+        lattice (Synergia.lattice.lattice): A Synergia lattice object
+        opts (options.Options): A Synergia options instance
+    
+    Returns:
+        lattice (Synergia.lattice.lattice): The Synergia lattice object, updated with string attributes
+    """
+
 
     for elem in lattice.get_elements():
-            #set an aperture if specified
+        #set an aperture if specified
         if opts.radius:
             elem.set_double_attribute("circular_aperture_radius", opts.radius)
 
         # set the propagation method.
-        # extractor_type may be "chef_maps", "chef_mixed", or
-        #    chef_propagate
+        # extractor_type may be "chef_maps", "chef_mixed", or chef_propagate
         if opts.use_maps == "taylor":
             pass
         elif opts.use_maps == "all":
@@ -471,10 +461,14 @@ def set_lattice_element_type(lattice, opts):
 def compare_lattices(lattice1, lattice2):
 
     '''
+    Compares the elements between two lattices. 
     
-    Compares the elements in a lattice. Lists elements which are unique to each lattice, and further lists discrepancies
-    in elements that share the same name. Returns no information for lattice elements which are the same.
+    Lists elements which are unique to each lattice, and further lists discrepancies in elements 
+    that share the same name. Returns no information for lattice elements which are the same.
     
+    Arguments:
+        lattice1 (Synergia.lattice.lattice): A Synergia lattice object
+        lattice2 (Synergia.lattice.lattice): A Synergia lattice object
     
     '''
 
@@ -548,7 +542,20 @@ def compare_lattices(lattice1, lattice2):
 
 
 def get_maps(lattice):
-    '''Return the matrices for each step in the stepper'''
+    '''
+    Return the 6x6 R-matrices for each step in a default Synergia stepper for a given lattice.
+    
+    This function runs through every step in the stepper, extracts the operators for each step, 
+    and processes these using Synergia's fast mapping operation to obtain 6x6 matrices for each operator.
+    A list comprising all such maps is then returned for the input lattice object.
+    
+    Arguments:
+        lattice (Synergia.lattice.lattice): A Synergia lattice object
+        
+    Returns:
+        maps (list): A list of 6x6 matrices obtained from Synergia's fast mapping operation for each step.
+    
+    '''
     
     for element in lattice.get_elements():
         element.set_string_attribute("extractor_type", "chef_map")
@@ -574,12 +581,6 @@ def get_maps(lattice):
                     if operation.get_type() == 'fast_mapping':
                         fmo = synergia.simulation.as_fast_mapping_operation(operation)
                         dense_mapping = synergia.simulation.Dense_mapping(fmo.get_fast_mapping())
-                        #print "order 0:"
-                        #print dense_mapping.get_constant_term()
-                        #print "order 1:"
-                        #print dense_mapping.get_linear_term()
-                        #etype = io.get_slices()[0].get_lattice_element().get_type()
-                        #ename = io.get_slices()[0].get_lattice_element().get_name()
                         dmap = dense_mapping.get_linear_term()
                         dmap_copy = np.copy(dmap)
                         #dmmap = dense_mapping.get_linear_term_mad()                        
@@ -596,6 +597,15 @@ def get_maps(lattice):
     return maps
     
 def combine_maps(maplist):
+    """
+    Multiplies together a list of maps to construct a combined map.
+    
+    Arguments:
+        maplist (list): A list of 6x6 arrays representing R-matrices.
+        
+    Returns:
+        final (ndArray): The product of the matrices in maplist.
+    """
     copylist = list(maplist) #copy the list to preserve the original
     dim = copylist[0].shape[0]
     final = np.identity(dim)
