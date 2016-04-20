@@ -8,8 +8,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import options
 import synergia
-#from mpl_toolkits.axes_grid import make_axes_locatable
-#from mpl_toolkits import axes_grid
 
 coords = {}
 coords['x'] = 0
@@ -35,10 +33,16 @@ fixed['c'] = 0.01
 
 def plot_P(PArray, opts, num=10, ID=0):
     
-    '''Create a Poincare plot for specified particle IDs over pre-specified turn #s
+    '''Create a Poincare plot for specified particle IDs over pre-specified turn #s.
+    
+    Arguments:
+        PArray (ndArray): An array of particle data
+        opts (options.Options): A Synergia options instance including an opts.plots list with >= 2 coordinates
+        num (Optional[int]): The number of particles whose coordinates are plotted. Defaults to 10.
+        ID (Optional[int]): The particle ID to plot when looking at a single particle. Defaults to 0.
     
     
-    Note: Currently, opts.plots must be a list of coordinates of length 2!
+    This function will save the plot if opts.save = True.
     
     '''
 
@@ -47,10 +51,6 @@ def plot_P(PArray, opts, num=10, ID=0):
     
     if opts.num:
         num = opts.num
-    
-    #plot up to 10 particle tracks
-    #if PArray.shape[1] < num:
-    #    num = PArray.shape[1]
 
     #plot specified # of turns
     if opts.turns:
@@ -67,9 +67,6 @@ def plot_P(PArray, opts, num=10, ID=0):
     h = reshaped[0]
     v = reshaped[1]
     
-    #ymax = max(abs([h,v]))
-    
-    
     if opts.scale:
         fig = plt.figure(figsize=(opts.scale*8,opts.scale*6))
     else:
@@ -78,13 +75,9 @@ def plot_P(PArray, opts, num=10, ID=0):
     plt.subplot(1,1,1)
     ax = plt.gca()
     
-    #print ymin, ymax
-    
     ax.scatter(h,v, c ='b', s=2)
     ax.set_aspect('equal') #want equal aspect ratios for Poincare plots
-    
-    #ax.set_ylim([ymin,ymax])
-    #plt.plot(h,v, 'o')
+
     plt.xlabel(opts.hcoord,fontsize=round(12*opts.scale))
     plt.ylabel(opts.vcoord,fontsize=round(12*opts.scale))
     title = opts.hcoord + '-'+ opts.vcoord + ' for ' + str(turns) + ' turns'
@@ -93,8 +86,6 @@ def plot_P(PArray, opts, num=10, ID=0):
     if opts.plot_lost:
             title = 'Lost Particles: ' + title
     plt.title(title, y=1+0.05/opts.scale, fontsize=round(14*opts.scale))
-    #plt.draw()
-    #fig.tight_layout()
     plt.show()
     
     if opts.save:
@@ -105,14 +96,15 @@ def plot_P(PArray, opts, num=10, ID=0):
 def plot_J(JArray,opts, ID=0):
     
     '''
-    Create plot for single particle invariant for one particle over pre-specified turn #s
+    Create plot for single particle invariant for one particle over pre-specified turn numbers.
     
     Arguments:
-    JArray - numpy array of single particle hamiltonian values
-    opts - options object
+        JArray (ndArray): An array of particle invariant data.
+        opts (options.Options): A Synergia options instance including an opts.turns value.
+        ID (Optional[int]): The particle ID to plot when looking at a single particle. Defaults to 0. 
+                            Can be overwritten by specifying opts.ID
     
-    Optional:
-    ID - specify the specific particle to be plotted (default 0)
+    This function will save the plot if opts.save = True.
     
     '''
     
@@ -152,14 +144,10 @@ def plot_J(JArray,opts, ID=0):
     fig = plt.figure(figsize=(8,6))
     plt.subplot(1,1,1)
     ax = plt.gca()
-    
-    #print ymin, ymax
-    
+
     ax.scatter(h,vScale, c ='b', s=6)
-    #ax.set_aspect('equal')
-    
+
     ax.set_ylim([ymin,ymax])
-    #plt.plot(h,v, 'o')
     plt.xlabel(opts.hcoord,fontsize=12)
     
     if opts.num == 2:
@@ -184,36 +172,31 @@ def plot_J(JArray,opts, ID=0):
         title = title + ' for lattice ' + opts.lattice_name
         
     plt.title(title, y=1.05, fontsize=14)
-    #plt.draw()
-    #fig.tight_layout()
+
     plt.show()
     
     if opts.save:
-        #sv_title = 'J_'+str(ID)+'_'+ opts.lattice_name + '.pdf'
         fig.savefig(sv_title, bbox_inches='tight') 
 
 
 
 ################################## GETTERS ####################################
 
-def get_one_particle(inputfile, ID=23456):
+def get_one_particle(inputfile, ID=1): 
+    '''
+    Reads an input file and returns a single particle's coordinates specified by particle ID.
     
-    '''Reads an input file and returns a single particle's coordinates specified by particle ID.
+    Arguments:
+        inputfile (str): path to a .h5 file containing particle diagnostics.
+        ID (Optional[int]): particle ID for the one particle to get. Defaults to 1.
+        
+    Returns:
+        particle (ndArray): array of particle data [x, x', y, y', cdt, dp, ID]
     
     '''
     
     f = tables.openFile(inputfile, 'r')
     particles = f.root.particles.read()
-    
-    #As a test, arbitrarily remove some particles - working as intended
-    #particles = np.delete(particles,10,0)
-    #lost.append(10)
-    #particles = np.delete(particles,20,0)
-    #lost.append(21)
-    
-    #define lost particles array
-    #lost_particles = np.zeros((len(lost),7))
-    #lost_particles[:,6] = lost
     
     #get appropriate reference properties from file root
     npart = particles.shape[0]
@@ -224,17 +207,12 @@ def get_one_particle(inputfile, ID=23456):
 
     f.close()
     
-    #ID = 23456
-    
     header = dict()
     header['n_part'] = npart
     header['mass'] = mass
     header['p_ref'] = p_ref
     header['s_val'] = sn
     header['t_len'] = tn
-    
-    #need to potentially adjust the counter!
-    #adjustment = particles[npart-1, 6] - (npart-1)
     
     #separate lost particles
     for particle in particles:
@@ -242,24 +220,21 @@ def get_one_particle(inputfile, ID=23456):
         if val == ID:
             return particle
 
-def get_some_particles(inputfile):
+def get_some_particles(inputfile, ID=np.arange(100)):
+    '''
+    Reads an input file and returns a several particles' coordinates specified by particle ID.
     
-    '''Reads an input file and returns a single particle's coordinates specified by particle ID.
+    Arguments:
+        inputfile (str): path to a .h5 file containing particle diagnostics.
+        ID (Optional[list]): list of particle ID for the one particle to get. Defaults to [1:100]
+        
+    Returns:
+        part_vals (ndArray): array of particle data [x, x', y, y', cdt, dp, ID] for each particle
     
     '''
     
     f = tables.openFile(inputfile, 'r')
     particles = f.root.particles.read()
-    
-    #As a test, arbitrarily remove some particles - working as intended
-    #particles = np.delete(particles,10,0)
-    #lost.append(10)
-    #particles = np.delete(particles,20,0)
-    #lost.append(21)
-    
-    #define lost particles array
-    #lost_particles = np.zeros((len(lost),7))
-    #lost_particles[:,6] = lost
     
     #get appropriate reference properties from file root
     npart = particles.shape[0]
@@ -270,7 +245,7 @@ def get_some_particles(inputfile):
 
     f.close()
     
-    ID = np.arange(5000)
+    #ID = np.arange(5000)
     
     header = dict()
     header['n_part'] = npart
@@ -278,9 +253,6 @@ def get_some_particles(inputfile):
     header['p_ref'] = p_ref
     header['s_val'] = sn
     header['t_len'] = tn
-    
-    #need to potentially adjust the counter!
-    #adjustment = particles[npart-1, 6] - (npart-1)
     
     part_vals = []
     
@@ -294,23 +266,23 @@ def get_some_particles(inputfile):
 
 def get_particles(inputfile, lost=None, lostlist=None):
     
-    '''Reads an input file and returns a numpy array of particles and a dictionary of root values. 
+    '''
+    Reads an input file and returns a numpy array of particles and a dictionary of root values. 
     If lost particles specified, then returns those separately.
+    
+    Arguments:
+        inputfile (str): path to a .h5 file containing particle diagnostics.
+        lost (Optional[bool]): True if some particles have been lost. Defaults to None.
+        lostlist (Optional[list]): List of particle IDs that were lost during the simulation. Defaults to None.
+        
+    Returns:
+        header (dict): dictionary of meta data regarding the particle array
+        particles (ndArray): array of particle data [x, x', y, y', cdt, dp, ID] for each particle    
     
     '''
     
     f = tables.openFile(inputfile, 'r')
     particles = f.root.particles.read()
-    
-    #As a test, arbitrarily remove some particles - working as intended
-    #particles = np.delete(particles,10,0)
-    #lost.append(10)
-    #particles = np.delete(particles,20,0)
-    #lost.append(21)
-    
-    #define lost particles array
-    #lost_particles = np.zeros((len(lost),7))
-    #lost_particles[:,6] = lost
     
     #get appropriate reference properties from file root
     npart = particles.shape[0]
@@ -328,9 +300,6 @@ def get_particles(inputfile, lost=None, lostlist=None):
     header['s_val'] = sn
     header['t_len'] = tn
     
-    #need to potentially adjust the counter!
-    #adjustment = particles[npart-1, 6] - (npart-1)
-    
     if lost:
     
         #define new lists
@@ -340,26 +309,15 @@ def get_particles(inputfile, lost=None, lostlist=None):
     
         #separate lost particles
         for index,particle in enumerate(particles):
-            #val = particle[6]-adjustment
             val = particle[6]
             if val in lostlist:
                 lost_particles.append(particle)
-                #remove from counter
-                #lost_counter.remove(val)
             else:
                 kept_particles.append(particle)
-            
-        #now we just need to make sure we fill out the kept_particles array to make it the proper length.
-        #if not len(lost_particles) == len(lost):
-        #    for num in lost_counter:
-        #        #placeholder = [-1,-1,-1,-1,-1,-1,num]
-        #        placeholder = [0, 0, 0, 0, 0, 0, num]
-        #        lost_particles.append(placeholder)
     
         return header, np.asarray(kept_particles), np.asarray(lost_particles)
     
     else:
-        #lost_particles = []
         
         return header, particles
     
@@ -367,12 +325,11 @@ def get_particles(inputfile, lost=None, lostlist=None):
 def get_file_list(opts, prefix='particles'):
 
     '''
-    
     Returns a list of files of the form 'particles*.h5' from the current directory 
 
     Arguments:
-        opts - options instance specifying relative path
-        prefix (optional) - use this to distinguish different .h5 file prefixes - default is 'particles'
+        opts (options.Options): Synergia options instance specifying relative path
+        prefix (Optional[str]): Used to distinguish different .h5 file prefixes. Default is 'particles'
     
     '''
     
@@ -383,7 +340,6 @@ def get_file_list(opts, prefix='particles'):
         #Otherwise check specified relative path
         path = os.path.join(os.getcwd(),opts.relpath)
         files = [os.path.join(path,fn) for fn in os.listdir(path)]
-        #files = os.listdir(opts.path) #only change directories if a different path is specified
 
     pfiles = []
 
@@ -395,7 +351,16 @@ def get_file_list(opts, prefix='particles'):
     return np.sort(pfiles)
     
 def get_lost_particle_list(opts):
-    '''Returns a list of particle IDs corresponding to lost particles from inspection of the output files'''
+    '''
+    Returns a list of particle IDs corresponding to lost particles from inspection of the output files
+    
+    Arguments:
+        opts (options.Options): Synergia options instance specifying relative path
+        
+    Returns:
+        lost_vals (ndArray): array of particle IDs corresponding to particles that were lost
+    
+    '''
     files = get_file_list(opts)
     
     #compare first file output to final file output
@@ -411,57 +376,19 @@ def get_lost_particle_list(opts):
         indices1 = particles1[:,6]
         indices2 = particles2[:,6]
     
-    
         combined_index = np.append(indices1,indices2)
         s = np.sort(combined_index)
         ci_shared = s[s[1:] == s[:-1]] #list of those that remain
         ci_full = [int(ind) for ind in np.unique(combined_index)] #full list
         lost_vals = np.delete(ci_full, ci_shared) #lost values
-    
-        #print lost_vals
-    
+
         if not len(lost_vals) == len(ci_full) - len(ci_shared):
+            #Print a sequence of warnings and some debug information
             print "Warning: Length of lost list is not equal to number of lost particles!"
             print "{} values are shared out of {} total values.".format(len(ci_shared),len(ci_full))
             print "Therefore there are {} lost values.".format(len(ci_full)-len(ci_shared))
             print "However I caclulate the length of the lost array to be {}.".format(len(lost_vals))
     
-    #first check if size is equal
-    #if not (header1['n_part'] == header2['n_part']):
-        
-    #    numLost = header1['n_part'] - header2['n_part']
-        
-        
-    #    lost = [int(index) for index in particles1[:,6] if not index in particles2[:,6]]
-        
-    #    if not numLost == len(lost):
-    #        print "Warning: Length of lost list is not equal to number of lost particles!"
-        
-        #make a boolean comparison
-        #boolVals = (particles1[0:header2['n_part'],6] == particles2[:,6])
-        
-        
-        #construct list of lost particles
-        #boolList = list(boolVals)
-        #start = 0;
-        #stop = len(boolList);
-        #offset = 0; #offset must increment for each lost particle as list index dephases with particle index
-
-        #while start < stop:
-        #    try:
-        #        idx = boolList.index(False) +offset #include offset
-        #        lost.append(int(particles1[idx,6])) #append particle ID, could be different from array index
-        #        boolList.remove(False)
-        #        start = idx
-        #        offset +=1
-        #        #print str(start) + 'is start and ' + str(stop) + 'is stop'
-        #    except ValueError:
-        #        start = stop
-    
-    #if only one particle is lost, then we have an int and not a list, so we want to cast as a list
-    #if type(lost) == int:
-    #    return [lost]
-    #else: 
     return lost_vals
     
     
@@ -470,9 +397,10 @@ def get_twiss(lattice_simulator):
     Returns an array of twiss parameters versus longitudinal coordinate 's' for a given lattice.
     
     Arguments:
-    lattice_simulator - a Synergia lattice simulator
+        lattice_simulator (synergia.simulation.lattice_simulator) - a Synergia lattice simulator
     
-    Return values have array configuration: [s,betax,alphax,gammax,betay,alphay,gammay]
+    Returns:
+        twiss (ndarray): Array of twiss values with structure [s,betax,alphax,gammax,betay,alphay,gammay]
     '''
     
     lattice = lattice_simulator.get_lattice()
@@ -505,12 +433,16 @@ def get_sliced_twiss(lattice_simulator):
     '''
     Returns an array of twiss parameters versus longitudinal coordinate 's' for a given lattice simulator.
     
-    This represents an improvement in resolution of the lattice, as latticefunctions are calculated slice by slice. See lfplot.get_sliced_lattice_functions()
+    This represents an improvement in resolution of the lattice, as latticefunctions are calculated slice by slice. 
+    See lfplot.get_sliced_lattice_functions(), as it represents the same operation. While this in many ways deprecates
+    the original "get_twiss()" parameterization, its relevant for specific instances where you want a "slice-independent"
+    view of the lattice functions to compare against other possible implementations.
     
     Arguments:
-    lattice_simulator - a Synergia lattice simulator
+        lattice_simulator (synergia.simulation.lattice_simulator) - a Synergia lattice simulator
     
-    Return values have array configuration: [s,betax,alphax,gammax,betay,alphay,gammay]
+    Returns:
+        twiss (ndarray): Array of twiss values with structure [s,betax,alphax,gammax,betay,alphay,gammay]
     '''
     
     lattice = lattice_simulator.get_lattice()
@@ -551,17 +483,22 @@ def get_sliced_twiss(lattice_simulator):
     return np.asarray(twiss)
     
 
-def get_human_coords(filelist, lost=None,lostlist=None, plotlost=False, num=None, ID=None):
+def get_human_coords(filelist, lost=None,lostlist=None, plotlost=False, num=None):
     '''
-    
     Returns a numpy array of non-normalized (human) coordinate vectors from .h5 files in filelist.
     
     Arguments:
-    filelist -  A list of .h5 files containing particle array information
+        filelist (str):  A list of .h5 files containing particle array information
+        lost (Optional[bool]): True if some particles have been lost. Defaults to None.
+        lostlist (Optional[list]): List of particle IDs that were lost during the simulation. Defaults to None.
+        plotlost (Optional[bool]): True if the lost particle coordinates are desired. Default to False.
+        num (Optional[int]): If specified, only returns the first num particles. Default to None (returns all).
     
     Outputs:
-    A numpy array with dimension #turns x #particles x #transverse coordinates(4).
-    The command norm[B][A] returns vector of coordinates for particle A at turn B.
+        full_coords (ndarray): A numpy array with dimension #turns x #particles x #transverse coordinates(4).
+    
+    
+    Note that the command norm[B][A] returns vector of coordinates for particle A at turn B.
     
     '''
     full_coords = [] #full_coords is a list of arrays of particle coordinates
@@ -618,8 +555,7 @@ def get_human_coords(filelist, lost=None,lostlist=None, plotlost=False, num=None
             full_coords.append(coord[:num])
         else:  
             full_coords.append(coord) #added flatten here
-        #append 0s to maintain array size
-        #if not header['n_part'] == norm_coords.shape[0]
+
     return np.asarray(full_coords)
     
 def get_normalized_coords(filelist, twiss, lost=None,lostlist=None, plotlost=False, num=None, ID=None):
