@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from elliptic import elliptic_beam
+from elliptic_beam import EllipticBeam
 from scipy import constants as consts
 import random, time
 import sys, os
@@ -73,7 +73,7 @@ def toyellipticalbeam6D(opts):
         innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
         transverseEmittance = emit
 
-        myBunchGenerator = ellipticbeam.EllipticBeam(t, c, beta, betaPrime)
+        myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
         #coords is an array of 4-vectors containing coordinate space information
         coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
         
@@ -155,7 +155,7 @@ def fixedellipticalbeam6D(opts):
         pArray[idx] = random.gauss(0, dpop)
         cdtArray[idx] = random.gauss(0, sigmaz)
 
-    myBunchGenerator = ellipticBeam.EllipticBeam(t, c, beta, betaPrime)
+    myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
     bunch = myBunchGenerator.generatebunch(transverseEmittance, numMacroParticles)
     
     for index,emit in enumerate(opts.emits):
@@ -163,7 +163,7 @@ def fixedellipticalbeam6D(opts):
         innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
         transverseEmittance = emit
 
-        myBunchGenerator = ellipticbeam.EllipticBeam(t, c, beta, betaPrime)
+        myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
         #coords is an array of 4-vectors containing coordinate space information
         coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
         

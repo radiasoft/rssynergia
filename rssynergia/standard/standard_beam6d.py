@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from mpi4py import MPI
 from scipy import constants
 
-from standard import StandardBeam
+from standard import standard_beam
 from base_diagnostics import read_bunch
 from base_diagnostics import workflow
 from base_diagnostics import latticework
@@ -63,9 +63,9 @@ def toyKVbeam6D(opts):
         transverse_emittance = emit
 
         if opts.betae:
-            mybunchgenerator = StandardBeam(opts.betae) #use betae
+            mybunchgenerator = standard_beam.StandardBeam(opts.betae) #use betae
         else:
-            mybunchgenerator = StandardBeam() #fixed beta=1, betaprime=0
+            mybunchgenerator = standard_beam.StandardBeam() #fixed beta=1, betaprime=0
         #coords is an array of 4-vectors containing coordinate space information
         coords = mybunchgenerator.generatefixedbunch(transverse_emittance, num_macro_particles, opts.seed)
         
