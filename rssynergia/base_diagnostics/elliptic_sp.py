@@ -1485,7 +1485,7 @@ def toy_calc_H_and_ID(bunch, opts, elliptic = True):
 
         return hID, iID
 
-def calc_bunch_H(bunch, opts,header, elliptic = True):
+def calc_bunch_H(bunch, opts,header = None, elliptic = True):
     '''
     Calculate the invariants for a group of particles for any header.
         
@@ -1496,6 +1496,8 @@ def calc_bunch_H(bunch, opts,header, elliptic = True):
         bunch (synergia.bunch.bunch.Bunch/ndarray) : A Synergia bunch object or an array of particles - [x, x', y, y', cdt, dp, ID]
         opts (options.Options):  A Synergia options instance containing plotting parameters and path information.
                                  This object also points to the lattice_simulator and other simulation specific details.
+        header (dict): A Python dictionary containing meta-data for a particle diagnostics file. Specifies 's_val' value.
+                        Defaults to a dummy header with 's_val' = 0.
         elliptic (Optional[bool]): If True, compute elliptic invariants. Defaults to True.
     
     Returns:
@@ -1508,7 +1510,13 @@ def calc_bunch_H(bunch, opts,header, elliptic = True):
     elif type(bunch) == np.ndarray:
         particles = bunch
     
-    twiss = get_sliced_twiss(opts)
+    twiss = get_sliced_twiss(opts.lattice_simulator)
+    
+    #if no header provided, create dummy header with s_val = 0!
+    if not header:
+        header = {}
+        header['s_val'] = 0
+    
     norm_coords = normalized_coordinates(header, particles, twiss)
     
     if elliptic:

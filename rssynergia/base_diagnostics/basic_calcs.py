@@ -7,6 +7,8 @@ import scipy.constants as const
 import synergia
 import os
 import matplotlib.pyplot as plt
+import tables
+from matplotlib import gridspec
 
 def params(mass,kE):
     '''
@@ -242,9 +244,6 @@ def make_Hvals(opts, ID=0):
         
     return Hvals, Ivals
 
-
-import tables
-from matplotlib import gridspec
 
 def plot_bunch(particles_file, opts=None, part=None):
     '''Returns a synergia bunch object constructed from a particles output file.'''
