@@ -1,11 +1,13 @@
 ---
-sudo: required
 language: python
 branches:
   only:
     - master
+addons:
+  apt:
+    packages:
+      - libhdf5-dev
 install:
-  - sudo apt-get libhdf5-dev
   - pip install -U pip setuptools tox
   - pip install -r requirements.txt
 script:
