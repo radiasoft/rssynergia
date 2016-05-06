@@ -6,7 +6,7 @@ branches:
 addons:
   apt:
     packages:
-      - libhdf5-dev
+      - libhdf5-serial-dev
 install:
   - pip install -U pip setuptools tox
   - pip install -r requirements.txt
