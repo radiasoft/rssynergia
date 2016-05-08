@@ -11,26 +11,27 @@ import synergia_workflow
 import numpy as np
 import matplotlib.pyplot as plt
 
-from base_diagnostics import read_bunch
-from base_diagnostics import workflow
-from base_diagnostics import latticework
+import rssynergia
+from rssynergia.base_diagnostics import read_bunch
+from rssynergia.base_diagnostics import workflow
+from rssynergia.base_diagnostics import latticework
 
 
 def toyellipticalbeam6D(opts):
     '''
-    
+
     Generate a toy costing beam with fixed elliptical Hamiltonian and returns the particle array, while also saving the array to
     a text file.
-    
+
     Coordinates are chosen with fixed random number generator seed, so that they should always produce the same initial distribution
     for a given emittance.
-    
+
     Args:
         opts (object): Instance of the Synergia options class containing beam and macroparticle information
-    
+
     Returns:
         bunch (ndarray): NumPy array with bunch with values {x, px, y, py, cdt, z, ID} for each particle
-    
+
     '''
 
     # Beam parameters
@@ -43,9 +44,9 @@ def toyellipticalbeam6D(opts):
     sigmaz = opts.stdz
     numMacroParticles = opts.macro_particles
 
-    t = opts.t 
-    c = opts.c 
-    
+    t = opts.t
+    c = opts.c
+
     #Calculate bunch coordinates at entrance to NL magnet section
     beta = opts.betae
     alpha = -1*opts.alphae
@@ -69,26 +70,26 @@ def toyellipticalbeam6D(opts):
     #innerBunch = np.zeros(numMacroParticles)
 
     for index,emit in enumerate(opts.emits):
-        
+
         innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
         transverseEmittance = emit
 
         myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
         #coords is an array of 4-vectors containing coordinate space information
         coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
-        
-        
+
+
         for idx in range(len(coords)):
             pArray[idx] = random.gauss(0, dpop)
             cdtArray[idx] = random.gauss(0, sigmaz)
-            
+
             #assign unique index value to each particle
             ID = index*len(coords) + idx
-        
+
             coords[idx] = np.append(coords[idx],[cdtArray[idx],pArray[idx],ID])
-        
+
         bunch.append(coords)
-        
+
 
     toFile = None
     if toFile:
@@ -98,14 +99,14 @@ def toyellipticalbeam6D(opts):
             print ' !Warning -- '
             print 'File '+fileName+' already exists. Renaming the old file to '+newFileName
             os.rename('./'+fileName, './'+newFileName)
-    
+
         bunchFile = open(fileName, 'w')
         for idx in range(0,numMacroParticles):
             ptclString = str(bunch[idx][0])+' '+str(bunch[idx][1])+' '+str(bunch[idx][2])+' '+str(bunch[idx][3])+' '+str(cdtArray[idx])+' '+str(pArray[idx])+'\n'
             bunchFile.write(ptclString)
 
         bunchFile.close()
-        
+
     return np.asarray(bunch)
 
 
@@ -113,13 +114,13 @@ def fixedellipticalbeam6D(opts):
     """
     Generate a toy costing beam with fixed elliptical Hamiltonian for fixed lattice parameters
     and returns the particle array, while also saving the array to a text file.
-    
+
     Args:
         opts (object): Instance of the Synergia options class containing beam and macroparticle information
-    
+
     Returns:
         bunch (ndarray): NumPy array with bunch with values {x, px, y, py, cdt, z, ID} for each particle
-    
+
     """
 
     # Beam parameters
@@ -135,7 +136,7 @@ def fixedellipticalbeam6D(opts):
 
     t = 0.4 #fixed for IOTA 6-6 for now
     c = 0.01 #fixed for IOTA 6-6 for now
-    
+
     #calculate beta at injection - center of NL element
     beta = 0.6538
     betaPrime = 0.0
@@ -157,26 +158,26 @@ def fixedellipticalbeam6D(opts):
 
     myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
     bunch = myBunchGenerator.generatebunch(transverseEmittance, numMacroParticles)
-    
+
     for index,emit in enumerate(opts.emits):
-        
+
         innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
         transverseEmittance = emit
 
         myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
         #coords is an array of 4-vectors containing coordinate space information
         coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
-        
-        
+
+
         for idx in range(len(coords)):
             pArray[idx] = random.gauss(0, dpop)
             cdtArray[idx] = random.gauss(0, sigmaz)
-            
+
             #assign unique index value to each particle
             ID = index*len(coords) + idx
-        
+
             coords[idx] = np.append(coords[idx],[cdtArray[idx],pArray[idx],ID])
-        
+
         bunch.append(coords)
 
     if os.path.isfile(fileName):
@@ -184,29 +185,29 @@ def fixedellipticalbeam6D(opts):
         print ' !Warning -- '
         print 'File '+fileName+' already exists. Renaming the old file to '+newFileName
         os.rename('./'+fileName, './'+newFileName)
-    
+
     bunchFile = open(fileName, 'w')
     for idx in range(0,numMacroParticles):
         ptclString = str(bunch[idx][0])+' '+str(bunch[idx][1])+' '+str(bunch[idx][2])+' '+str(bunch[idx][3])+' '+str(cdtArray[idx])+' '+str(pArray[idx])+'\n'
         bunchFile.write(ptclString)
 
     bunchFile.close()
-    
+
     return np.asarray(bunch)
-    
-    
+
+
 def make6Dellipticalbeam(lattice_file,lattice_name):
-    
+
     '''Constructs a coasting elliptic beam with Gaussian longitduinal distribution and stores it in a Synergia bunch.
-    
+
     A lattice file is required, as Synergia constructs the bunch relative to the reference particle as specified in mad-x.
-    
+
     Arguments:
         lattice_file - A .madx file which stores the lattice
         lattice_name - The sequence name within the madx file
 
      '''
-    
+
     #import lattice and construct options object
     #load lattice
     lattice = synergia.lattice.MadX_reader().get_lattice(lattice_name,lattice_file)
@@ -245,6 +246,5 @@ def make6Dellipticalbeam(lattice_file,lattice_name):
     bucket_length = lattice_simulator.get_bucket_length()
     bucket_length = 0.05 #potential workaround
     myBunch = read_bunch.read_bunch(particles_file, ref, opts.real_particles, bucket_length, comm, verbose=False)
-    
+
     return opts, lattice, lattice_simulator, stepper, myBunch
-    
