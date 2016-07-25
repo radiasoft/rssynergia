@@ -23,7 +23,6 @@ def plot_distribution(arr, numBins, norm=False):
     Constructs a matplotlib plot and returns it. Automatically displayed when using IPython backend.
     
     '''
-    
     myVals, myBins = np.histogram(arr,numBins)
     bincenters = 0.5*(myBins[1:]+myBins[:-1])
     bin_width = 1.0*(myBins[1]-myBins[0])

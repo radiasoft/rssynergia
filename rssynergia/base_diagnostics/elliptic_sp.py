@@ -301,7 +301,7 @@ def get_particles(inputfile, lost=None, lostlist=None):
         #define new lists
         lost_particles = []
         kept_particles = []
-        lost_counter = lostlist
+        #lost_counter = lostlist
     
         #separate lost particles
         for index,particle in enumerate(particles):
@@ -385,7 +385,7 @@ def get_lost_particle_list(opts):
             print "Therefore there are {} lost values.".format(len(ci_full)-len(ci_shared))
             print "However I caclulate the length of the lost array to be {}.".format(len(lost_vals))
     
-    return lost_vals
+    return np.asarray(lost_vals)
     
     
 def get_twiss(lattice_simulator):
@@ -506,7 +506,7 @@ def get_human_coords(filelist, lost=None,lostlist=None, plotlost=False, num=None
         inputfile = fileName         
         
         if lost:
-            header, particles, lost_particles = get_particles(inputfile, lost,lostlist)
+            header, particles, lost_particles = get_particles(inputfile, lost, lostlist)
         
             x = lost_particles[:,coords['x']] #units m
             xp = lost_particles[:,coords['xp']] #unitless
@@ -584,7 +584,7 @@ def get_normalized_coords(filelist, twiss, lost=None,lostlist=None, plotlost=Fal
         inputfile = fileName         
         
         if lost:
-            header, particles, lost_particles = get_particles(inputfile, lost,lostlist)
+            header, particles, lost_particles = get_particles(inputfile, lost, lostlist)
         else:
             header, particles = get_particles(inputfile)
         
@@ -633,11 +633,17 @@ def get_single_particle_elliptic_invariants(filelist, twiss, opts, lost, num=1):
 
     invariant = [] #invariant is a list of arrays of macroparticles
     
+    lostlist = get_lost_particle_list(opts)
+    
+    #if not type(lostlist) == bool:
+    lost = lostlist.any()
+        
+        
     for index,fileName in enumerate(filelist):
         inputfile = fileName
         
         if lost:
-            header, particles, lost_particles = get_particles(inputfile, lost)
+            header, particles, lost_particles = get_particles(inputfile, lost, lostlist)
         else:
             header, particles = get_particles(inputfile, lost)
         
