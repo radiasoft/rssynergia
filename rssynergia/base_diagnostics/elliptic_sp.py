@@ -72,6 +72,7 @@ def plot_P(PArray, opts, num=10, ID=0):
     ax = plt.gca()
     
     ax.scatter(h,v, c ='b', s=2)
+    
     ax.set_aspect('equal') #want equal aspect ratios for Poincare plots
 
     plt.xlabel(opts.hcoord,fontsize=round(12*opts.scale))
@@ -81,11 +82,12 @@ def plot_P(PArray, opts, num=10, ID=0):
         title = title + ' for lattice ' + opts.lattice_name
     if opts.plot_lost:
             title = 'Lost Particles: ' + title
+    title = opts.lattice_name
     plt.title(title, y=1+0.05/opts.scale, fontsize=round(14*opts.scale))
     plt.show()
     
     if opts.save:
-        sv_title = 'Poincare'+'_' + opts.hcoord+'_' + opts.vcoord+'_'+ str(turns) + '_turns_'+  opts.lattice_name + '.pdf'
+        sv_title = 'Poincare'+'_' + opts.hcoord+'_' + opts.vcoord+'_'+ str(turns) + '_turns_'+  opts.lattice_name + '.png'
         fig.savefig(sv_title, bbox_inches='tight')     
     
 

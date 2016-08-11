@@ -118,7 +118,6 @@ def plot_long(bunch):
     ymax = np.max(y)
     zmax = np.max(z)
     zpmax = np.max(zp)
-
     
     #another way - use gridspec
     fig = plt.figure(figsize=(15,5))
@@ -182,6 +181,8 @@ def plt_bunch_dpop(bunch,opts,lost=None):
     
     coord_max = 2.*max([np.max(np.abs(myParticles[:,0])),np.abs(np.max(myParticles[:,2]))])
     mom_max  = 2.*max([np.max(np.abs(myParticles[:,1])),np.max(np.abs(myParticles[:,3]))])
+    #coord_max = 0.01
+    #mom_max = 0.01
     
     #for index,val in enumerate(opts.dpops):
     for index,val in enumerate(opts.dpops):
