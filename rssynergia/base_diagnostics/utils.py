@@ -8,6 +8,62 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
+def compare_distribution(arr1, arr2, numBins, norm=True):
+    '''Construct and return a histogram comparing two distributions
+    
+    Arguments:
+        arr1 (array-like): 1D array for binning
+        arr2 (array-like): 1D array for binning
+        numbins (int): # of bins for histogram
+        
+        (optional) norm: normalization flag (default True)
+    
+    Returns:
+        fig (matplotlib.figure.Figure): - a matplotlib figure handle
+    
+    Constructs a matplotlib plot and returns it. Automatically displayed when using IPython backend.    
+    
+    '''
+
+    myVals1, myBins1 = np.histogram(arr1,numBins)
+    bincenters1 = 0.5*(myBins1[1:]+myBins1[:-1])
+    bin_width1 = 1.0*(myBins1[1]-myBins1[0])
+    #normalize
+    myVals_norm1 = myVals1/(np.max(myVals1)*1.0)
+    
+    myVals2, myBins2 = np.histogram(arr2,numBins)
+    bincenters2 = 0.5*(myBins2[1:]+myBins2[:-1])
+    bin_width2 = 1.0*(myBins2[1]-myBins2[0])
+    #normalize
+    myVals_norm2 = myVals2/(np.max(myVals2)*1.0)    
+    
+    
+    #Set some matplotlib standards for plots 
+    mpl.rcParams['figure.figsize'] = 8, 6
+    
+    fig = plt.figure()
+    ax = fig.gca()
+    
+    ax.set_xlabel("Array values", fontsize=14)
+    ax.set_ylabel("Relative population", fontsize=14)
+    
+    if norm:
+        ax.plot(bincenters1,myVals_norm1, c='r', label='1')
+        ax.plot(bincenters2,myVals_norm2,  c='b', label='2')
+    else:
+        ax.plot(bincenters1,myVals1, c='r', label='1')
+        ax.plot(bincenters2,myVals2,  c='b', label='2')        
+    
+    plt.legend(loc='best')
+    
+    #close the first display call
+    plt.close()
+    
+    return fig #return the figure handle
+
+    
+    
+
 def plot_distribution(arr, numBins, norm=False):
     '''Construct a histrogram, then plot the resulting distribution.
     
