@@ -7,9 +7,9 @@ from mpi4py import MPI
 from scipy import constants
 
 from semi_gaussian import SemiGaussianBeam
-from base_diagnostics import read_bunch
-from base_diagnostics import workflow
-from base_diagnostics import latticework
+from rssynergia.base_diagnostics import read_bunch
+from rssynergia.base_diagnostics import workflow
+from rssynergia.base_diagnostics import latticework
 
 
 
