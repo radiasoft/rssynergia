@@ -318,8 +318,6 @@ def get_particles(inputfile, lost=None, lostlist=None):
     else:
         
         return header, particles
-    
-
 def get_file_list(opts, prefix='particles'):
 
     '''
@@ -614,9 +612,6 @@ def get_normalized_coords(filelist, twiss, lost=None,lostlist=None, plotlost=Fal
             norms.append(norm_coords) #added flatten here
 
     return np.asarray(norms)
-
-
-
 def get_single_particle_elliptic_invariants(filelist, twiss, opts, lost, num=1):
     '''
     Returns an array of single particle invariants (Hamiltonian with elliptic potential)
@@ -669,7 +664,6 @@ def get_single_particle_elliptic_invariants(filelist, twiss, opts, lost, num=1):
         invariant.append(vals)
 
     return np.asarray(invariant)
-
 def get_adjusted_elliptic_invariants(filelist, twiss, opts, lost, num=1):
 
     '''
@@ -825,7 +819,7 @@ def modified_T_array(t, delta_array, opts):
     
     return np.divide(t_array,correction)
     
-def phase_advance(p1, p2):
+def phase_advance(p1, p2, clockwise=False):
     '''
     Returns the angle between two vectors.
     
@@ -834,6 +828,7 @@ def phase_advance(p1, p2):
     Arguments:
         p1 (ndarray): Array containing phase space coordinates (e.g. [x, x'])
         p2 (ndarray): Array containing phase space coordinates (e.g. [x, x'])
+        clockwise (Bool): If true, forces rotation to be clockwise
         
     Returns:
         guess_angle (float): The angle between the input vectors, given in radians. Assumes clockwise rotation.
@@ -867,12 +862,15 @@ def phase_advance(p1, p2):
         #counterclockwise guess
         guess_neg_p2 = (norm2/norm1)*(p1[0]*np.cos(guess_angle) + p1[1]*np.sin(guess_angle))
         #print guess
-        if np.abs(guess_pos_p2 - p2[0]) < np.abs(guess_neg_p2 - p2[0]):
-            #positive guess is closer, clockwise
-            return guess_angle
+        if clockwise:
+                return guess_neg_p2
         else:
-            #negative closer, so counterclockwise
-            return guess_angle
+            if np.abs(guess_pos_p2 - p2[0]) < np.abs(guess_neg_p2 - p2[0]):
+                #positive guess is closer, clockwise
+                return guess_angle
+            else:
+                #negative closer, so counterclockwise
+                return guess_angle
     
     
 def normalized_coordinates(header, particles, twiss, offset=None, ID=None):
@@ -1015,9 +1013,7 @@ def elliptic_hamiltonian(u,v, opts):
     elliptic = (f2u + g2v) / (u**2 - v**2)
     kfac = -1.*t*c*c
     
-    return kfac*elliptic
-    
-    
+    return kfac*elliptic  
 def second_invariant(normalized, u,v, opts):
     '''
     Returns arrays of values for the second elliptic invariant (Hamiltonian) for a system with the IOTA nonlinear potential.
@@ -1194,7 +1190,7 @@ def get_hamiltonians(filelist):
 
 #################################Called Scripts#################################################################
 
-def single_turn_phase_advance(files, twiss, dim='x', nParticles=1000, indices=[0,1]):
+def single_turn_phase_advance(files, twiss, dim='x', nParticles=1000, indices=[0,1],clockwise=False):
     '''
     Compute the phase advance, modulo 2 pi, for particles between their outputs to two separate files.
     
@@ -1207,7 +1203,7 @@ def single_turn_phase_advance(files, twiss, dim='x', nParticles=1000, indices=[0
         dim (Optional[str]): Specifies plane ('x' or 'y') for computing phase advance. Defaults to 'x'.
         nParticles (Optional[int]): Specifies the number of particles to include in the return array. Defaults to [0,999).
         indices (Optional[int]): Specifies the start and end file to look at. Defaults to [0,1]
-    
+        clockwise (Bool): If true, then assume phase advance is clockwise
     
     Returns:
         Phases (array): Array of phase advances, nParticles in length
@@ -1224,11 +1220,11 @@ def single_turn_phase_advance(files, twiss, dim='x', nParticles=1000, indices=[0
         if dim == 'x':
             p1 = norm_coords[indices[0]][ind,(0,1)]
             p2 = norm_coords[indices[1]][ind,(0,1)]
-            phases.append(phase_advance(p1,p2)/(2.*np.pi))
+            phases.append(phase_advance(p1,p2,clockwise)/(2.*np.pi))
         if dim == 'y':
             p1 = norm_coords[indices[0]][ind,(2,3)]
             p2 = norm_coords[indices[1]][ind,(2,3)]
-            phases.append(phase_advance(p1,p2)/(2.*np.pi))  
+            phases.append(phase_advance(p1,p2,clockwise)/(2.*np.pi))  
     
     
     return phases
