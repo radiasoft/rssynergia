@@ -164,7 +164,7 @@ def getPlotVals(filename, plots):
     #generate plot params object
     plotparams = generate_plotparams()
     
-    f = tables.openFile(filename, 'r')
+    f = tables.open_file(filename, 'r')
     
     #assume all x values are master 's' for now
     param1 = plotparams[plots[0]]

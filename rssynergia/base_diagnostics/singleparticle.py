@@ -406,7 +406,7 @@ def get_particles(inputfile, lost=None):
     
     '''
     
-    f = tables.openFile(inputfile, 'r')
+    f = tables.open_file(inputfile, 'r')
     particles = f.root.particles.read()
     
     #As a test, arbitrarily remove some particles - working as intended

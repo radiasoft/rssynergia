@@ -193,7 +193,7 @@ def get_one_particle(inputfile, ID=1):
     
     '''
     
-    f = tables.openFile(inputfile, 'r')
+    f = tables.open_file(inputfile, 'r')
     particles = f.root.particles.read()
     
     #get appropriate reference properties from file root
@@ -231,7 +231,7 @@ def get_some_particles(inputfile, ID=np.arange(100)):
     
     '''
     
-    f = tables.openFile(inputfile, 'r')
+    f = tables.open_file(inputfile, 'r')
     particles = f.root.particles.read()
     
     #get appropriate reference properties from file root
@@ -279,7 +279,7 @@ def get_particles(inputfile, lost=None, lostlist=None):
     
     '''
     
-    f = tables.openFile(inputfile, 'r')
+    f = tables.open_file(inputfile, 'r')
     particles = f.root.particles.read()
     
     #get appropriate reference properties from file root

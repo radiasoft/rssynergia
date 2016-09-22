@@ -132,7 +132,7 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
         print "Loading particles from h5 file: ", particles_file
 
     if myrank == 0:
-        h5 = tables.openFile(particles_file)
+        h5 = tables.open_file(particles_file)
         # use explicit int conversion otherwise there seems to
         # be a typepython->C++ type  mismatch of numpy.int64->int
         num_total_particles = int(h5.root.particles.shape[0])

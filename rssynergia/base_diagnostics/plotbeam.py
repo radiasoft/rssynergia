@@ -64,7 +64,7 @@ def get_particles(opts):
     
     '''
     
-    f = tables.openFile(opts.inputfile, 'r')
+    f = tables.open_file(opts.inputfile, 'r')
     particles = f.root.particles.read()
     
     #get appropriate reference properties from file root

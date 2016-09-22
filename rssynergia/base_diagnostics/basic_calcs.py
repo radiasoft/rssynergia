@@ -252,7 +252,7 @@ def plot_bunch(particles_file, opts=None, part=None):
         inputfile = os.path.join(opts.output_dir,particles_file)
     else:
         inputfile = particles_file
-    f = tables.openFile(inputfile, 'r')
+    f = tables.open_file(inputfile, 'r')
     particles = f.root.particles.read()
 
     npart = particles.shape[0]
