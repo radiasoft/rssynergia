@@ -819,7 +819,7 @@ def modified_T_array(t, delta_array, opts):
     
     return np.divide(t_array,correction)
     
-def phase_advance(p1, p2, clockwise=False):
+def phase_advance(p1, p2, clockwise=True):
     '''
     Returns the angle between two vectors.
     
@@ -828,49 +828,25 @@ def phase_advance(p1, p2, clockwise=False):
     Arguments:
         p1 (ndarray): Array containing phase space coordinates (e.g. [x, x'])
         p2 (ndarray): Array containing phase space coordinates (e.g. [x, x'])
-        clockwise (Bool): If true, forces rotation to be clockwise
+        clockwise (optional[Bool]): If true, assumes rotation is clockwise. Defaults to true.
         
     Returns:
         guess_angle (float): The angle between the input vectors, given in radians. Assumes clockwise rotation.
     
     '''
+    #use the quadrant-dependent arcantangent to get the effective angle (measured clockwise) for each vector
+    #and take the difference of the two.
+    guess  = np.arctan2(p1[1],p1[0]) - np.arctan2(p2[1],p2[0])
     
-    norm1 = np.linalg.norm(p1)
-    norm2 = np.linalg.norm(p2)
-    
-    #Determine the quadrant - the integer corresponds to the quadrant
-    q1 = 1*(p1[0] > 0) & (p1[1] > 0) + 2*(p1[0] < 0) & (p1[1] > 0) + 3*(p1[0] < 0) & (p1[1] < 0) + 4*(p1[0] > 0) & (p1[1] < 0)
-    q2 = 1*(p2[0] > 0) & (p2[1] > 0) + 2*(p2[0] < 0) & (p2[1] > 0) + 3*(p2[0] < 0) & (p2[1] < 0) + 4*(p2[0] > 0) & (p2[1] < 0)
-
-    #calculate dot product
-    product = np.dot(p1,p2)
-    guess_angle = np.arccos(product/(norm1*norm2))
-    
-    if not q1==q2:
-        #quadrants change
-        if q2 > q1 or (q2==1 and q1 ==4):
-            #we have clockwise rotation across quadrants
-            return guess_angle
-        else:
-            #we have counter clockwise rotation across quadrants
-            return guess_angle
-            #return (2*np.pi* - guess_angle)
+    if guess < 0:
+        advance = 2*np.pi + guess
     else:
-        #same quadrant, so check x-value
-        #clockwise guess
-        guess_pos_p2 = (norm2/norm1)*(p1[0]*np.cos(guess_angle) - p1[1]*np.sin(guess_angle)) 
-        #counterclockwise guess
-        guess_neg_p2 = (norm2/norm1)*(p1[0]*np.cos(guess_angle) + p1[1]*np.sin(guess_angle))
-        #print guess
-        if clockwise:
-                return guess_neg_p2
-        else:
-            if np.abs(guess_pos_p2 - p2[0]) < np.abs(guess_neg_p2 - p2[0]):
-                #positive guess is closer, clockwise
-                return guess_angle
-            else:
-                #negative closer, so counterclockwise
-                return guess_angle
+        advance = guess
+        
+    if not clockwise:
+        advance = 2*np.pi - advance
+        
+    return advance    
     
     
 def normalized_coordinates(header, particles, twiss, offset=None, ID=None):
@@ -1227,7 +1203,7 @@ def single_turn_phase_advance(files, twiss, dim='x', nParticles=1000, indices=[0
             phases.append(phase_advance(p1,p2,clockwise)/(2.*np.pi))  
     
     
-    return phases
+    return np.asarray(phases)
     
 def plot_Poincare(opts, noTwiss=False):
     '''
