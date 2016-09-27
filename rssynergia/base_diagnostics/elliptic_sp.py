@@ -845,8 +845,9 @@ def phase_advance(p1, p2, clockwise=True):
         
     if not clockwise:
         advance = 2*np.pi - advance
-        
-    return advance    
+    
+    #adjust phase to be windowed for [-pi,pi]    
+    return advance - 2*np.pi*(advance>np.pi)   
     
     
 def normalized_coordinates(header, particles, twiss, offset=None, ID=None):
@@ -931,9 +932,6 @@ def normalized_coordinates(header, particles, twiss, offset=None, ID=None):
     particles_norm = np.vstack((newx,px,newy,py)).T
     
     return particles_norm
-    
-
-
 def elliptic_coordinates(normalized, opts):
     '''
     Return the an array of elliptic coordinate values u and v for a list of particles.
@@ -963,9 +961,7 @@ def elliptic_coordinates(normalized, opts):
     u = 0.5*(np.sqrt((x + 1.)**2 + y**2) + np.sqrt((x -1.)**2 + y**2))
     v = 0.5*(np.sqrt((x + 1.)**2 + y**2) - np.sqrt((x -1.)**2 + y**2))
     
-    return [u,v]
-    
-    
+    return [u,v]  
 def elliptic_hamiltonian(u,v, opts):
     '''
     Returns arrays of values for the first elliptic invariant (Hamiltonian) for a system with the IOTA nonlinear potential.
@@ -1031,8 +1027,6 @@ def second_invariant(normalized, u,v, opts):
     invariant = (p_ang + p_lin) + 2.*(c**2) * (fu * v**2 + gv * u**2)/(u**2 - v**2)
     
     return invariant
-       
-
 def single_particle_invariant(header, particles, twiss):
     '''
     Computes the Courant-Synder invariant for an array of particles.
@@ -1084,8 +1078,7 @@ def single_particle_invariant(header, particles, twiss):
     
     inv2 = invariantx + invarianty
     
-    return inv2
-    
+    return inv2  
 def get_invariants(filelist, twiss, lost):
     '''
     Computes the Courant-Synder invariant for a series of arrays of particles from a list of files.
@@ -1113,8 +1106,6 @@ def get_invariants(filelist, twiss, lost):
         invariant.append(single_particle_hamiltonian(norm_coords))
         
     return np.asarray(invariant)
-
-
 def single_particle_hamiltonian(normalized, ID=None):
     '''
     Computes the single particle Hamiltonian for an array of particles in absence of nonlinearities.
@@ -1141,8 +1132,6 @@ def single_particle_hamiltonian(normalized, ID=None):
         quadratic = 0.5* (px**2 + py**2) + 0.5*(x**2 + y**2)
         
     return quadratic
-    
-
 def get_hamiltonians(filelist):
     
     '''
@@ -1203,8 +1192,7 @@ def single_turn_phase_advance(files, twiss, dim='x', nParticles=1000, indices=[0
             phases.append(phase_advance(p1,p2,clockwise)/(2.*np.pi))  
     
     
-    return np.asarray(phases)
-    
+    return np.asarray(phases)   
 def plot_Poincare(opts, noTwiss=False):
     '''
     Plot a Poincare section in the desired normalized coordinates using the full Twiss of the lattice.
