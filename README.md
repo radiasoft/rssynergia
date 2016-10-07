@@ -1,6 +1,6 @@
-### rssynergia
+### RadiaSoft Synergia Support
 
-Support tools for Synergia.
+Support tools for [Synergia](https://web.fnal.gov/sites/Synergia).
 
 Learn more at https://github.com/radiasoft/rssynergia.
 
