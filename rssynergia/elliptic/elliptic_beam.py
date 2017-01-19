@@ -13,15 +13,22 @@ class EllipticBeam:
         betaPrime (float): the derivative of the beta function, defaults to 0
         t (float): the elliptic potential strength
         c (float): the elliptic potential c
+
+        quiet (boolean): Create the beam using a quiet start mode that gives the bunch 4-fold symmetry
+        (momenta are reflected across axes)
             
     '''
     
-    def __init__(self, _t, _c, _beta, _betaPrime=0.):
+    def __init__(self, _t, _c, _beta, _betaPrime=0., quiet=False):
 
         self.ellipticT = -1.*_t
         self.ellipticC = _c
         self.beta      = _beta
         self.betaPrime = _betaPrime
+        self.quiet = quiet
+
+        self.ptclsMade = 0
+        self.phaseSpaceList = []
 
     def computeHamiltonian(self, xHat, pxHat, yHat, pyHat):
         """Compute the Hamiltonian (1st invariant) for the integrable elliptic potential"""
@@ -98,14 +105,14 @@ class EllipticBeam:
         self.emittance = emittance
         yMax = newton(self.whatsleft, y0)        
         
-        # x is harder to bound due to the peanut nature of the potential -- estimate using conventional elliptic bunch
-        xMax = yMax
+        # x is harder to bound due to the peanut nature of the potential -- estimate using singular points (_c)
+        # !Changed from bounding based on regular ellipse to singular points due to lobes outside singular points
+        # causing issues - chall
+        xMax = self.ellipticC
         
         
         # Generate particles by creating trials and finding particles with potential less than emittance, then assign the rest to momentum
-        ptclsMade = 0
-        phaseSpaceList = []
-        while ptclsMade < nParticles:
+        while self.ptclsMade < nParticles:
             xTrial = 2.*(0.5 - random.random())*xMax
             yTrial = 2.*(0.5 - random.random())*yMax
             trialValue = self.computepotential(xTrial, yTrial)
@@ -119,10 +126,11 @@ class EllipticBeam:
                 pxReal = (pxHat + 0.5*self.betaPrime*xTrial)/np.sqrt(self.beta)
                 pyReal = (pyHat + 0.5*self.betaPrime*yTrial)/np.sqrt(self.beta)
                 ptclCoords = np.array([xReal, pxReal, yReal, pyReal])
-                phaseSpaceList.append(ptclCoords)
-                ptclsMade += 1        
-        
-        return phaseSpaceList
+                self.phaseSpaceList.append(ptclCoords)
+                self.ptclsMade += 1
+                if self.quiet:
+                    self.quiet_start(ptclCoords)
+        return self.phaseSpaceList
     
         
     def generatefixedbunch(self, emittance, nParticles, seed):
@@ -150,16 +158,16 @@ class EllipticBeam:
         self.emittance = emittance
         yMax = newton(self.whatsleft, y0)        
         
-        # x is harder to bound due to the peanut nature of the potential -- estimate using conventional elliptic bunch
-        xMax = yMax
+        # x is harder to bound due to the peanut nature of the potential -- estimate using singular points (_c)
+        # !Changed from bounding based on regular ellipse to singular points due to lobes outside singular points
+        # causing issues - chall
+        xMax = self.ellipticC
         
         #seed the random generator
         random.seed(seed)
         
         # Generate particles by creating trials and finding particles with potential less than emittance, then assign the rest to momentum
-        ptclsMade = 0
-        phaseSpaceList = []
-        while ptclsMade < nParticles:
+        while self.ptclsMade < nParticles:
             xTrial = 2.*(0.5 - random.random())*xMax
             yTrial = 2.*(0.5 - random.random())*yMax
             trialValue = self.computepotential(xTrial, yTrial)
@@ -174,7 +182,22 @@ class EllipticBeam:
                 pxReal = (pxHat + 0.5*self.betaPrime*xTrial)/np.sqrt(self.beta)
                 pyReal = (pyHat + 0.5*self.betaPrime*yTrial)/np.sqrt(self.beta)
                 ptclCoords = np.array([xReal, pxReal, yReal, pyReal])
-                phaseSpaceList.append(ptclCoords)
-                ptclsMade += 1        
-        
-        return phaseSpaceList
+                self.phaseSpaceList.append(ptclCoords)
+                self.ptclsMade += 1
+                if self.quiet:
+                    self.quiet_start(ptclCoords)
+
+    def quiet_start(self, ptclCoords):
+        translation1 = np.array([-1,1,-1,1])
+        translation2 = np.array([-1,-1,-1,-1])
+        translation3 = np.array([1,-1,1,-1])
+
+        ptcl1 = ptclCoords * translation1
+        ptcl2 = ptclCoords * translation2
+        ptcl3 = ptclCoords * translation3
+
+        self.phaseSpaceList.append(ptcl1)
+        self.phaseSpaceList.append(ptcl2)
+        self.phaseSpaceList.append(ptcl3)
+
+        self.ptclsMade += 3
