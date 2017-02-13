@@ -126,10 +126,11 @@ class EllipticBeam:
                 pxReal = (pxHat + 0.5*self.betaPrime*xTrial)/np.sqrt(self.beta)
                 pyReal = (pyHat + 0.5*self.betaPrime*yTrial)/np.sqrt(self.beta)
                 ptclCoords = np.array([xReal, pxReal, yReal, pyReal])
+                if self.quiet:
+                    self.quiet_start(ptclCoords)  
                 self.phaseSpaceList.append(ptclCoords)
                 self.ptclsMade += 1
-                if self.quiet:
-                    self.quiet_start(ptclCoords)
+                    
         return self.phaseSpaceList
     
         
@@ -182,10 +183,12 @@ class EllipticBeam:
                 pxReal = (pxHat + 0.5*self.betaPrime*xTrial)/np.sqrt(self.beta)
                 pyReal = (pyHat + 0.5*self.betaPrime*yTrial)/np.sqrt(self.beta)
                 ptclCoords = np.array([xReal, pxReal, yReal, pyReal])
-                self.phaseSpaceList.append(ptclCoords)
-                self.ptclsMade += 1
                 if self.quiet:
                     self.quiet_start(ptclCoords)
+                self.phaseSpaceList.append(ptclCoords)
+                self.ptclsMade += 1
+                    
+        return self.phaseSpaceList
 
     def quiet_start(self, ptclCoords):
         translation1 = np.array([-1,1,-1,1])
