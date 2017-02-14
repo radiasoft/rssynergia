@@ -91,8 +91,14 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
     # create a bunch with the correct number of macro particles
     bunch = synergia.bunch.Bunch(
         refpart,
-        num_total_particles, real_particles, comm,
-        bucket_length)
+        num_total_particles, real_particles, comm)
+    bunch.set_z_period_length(bucket_length)
+    
+    #Changed from older version (2/14/2017)
+    #bunch = synergia.bunch.Bunch(
+    #   refpart,
+    #   num_total_particles, real_particles, comm,
+    #   bucket_length)
 
     local_num = bunch.get_local_num()
     local_particles = bunch.get_local_particles()
@@ -155,8 +161,14 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
     # create a bunch with the correct number of macro particles
     bunch = synergia.bunch.Bunch(
         refpart,
-        num_total_particles, real_particles, comm,
-        bucket_length, 0)
+        num_total_particles, real_particles, comm)
+    bunch.set_z_period_length(bucket_length)
+    
+    #Changed from older version (2/14/2017)
+    #bunch = synergia.bunch.Bunch(
+    #   refpart,
+    #   num_total_particles, real_particles, comm,
+    #   bucket_length)
 
     local_num = bunch.get_local_num()
     local_particles = bunch.get_local_particles()
