@@ -185,8 +185,9 @@ class EllipticBeam:
                 ptclCoords = np.array([xReal, pxReal, yReal, pyReal])
                 if self.quiet:
                     self.quiet_start(ptclCoords)
-                self.phaseSpaceList.append(ptclCoords)
-                self.ptclsMade += 1
+                else:
+                    self.phaseSpaceList.append(ptclCoords)
+                    self.ptclsMade += 1
                     
         return self.phaseSpaceList
 
