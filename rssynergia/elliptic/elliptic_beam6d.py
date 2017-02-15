@@ -47,8 +47,6 @@ def toyellipticalbeam6D(opts):
     t = opts.t
     c = opts.c
 
-    quiet = opts.quiet
-
     #Calculate bunch coordinates at entrance to NL magnet section
     beta = opts.betae
     alpha = -1*opts.alphae
@@ -76,8 +74,8 @@ def toyellipticalbeam6D(opts):
         innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
         transverseEmittance = emit
 
-        if quiet:
-            myBunchGenerator = EllipticBeam(t, c, beta, betaPrime, quiet)
+        if opts.quiet:
+            myBunchGenerator = EllipticBeam(t, c, beta, betaPrime, opts.quiet)
         else:
             myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
         #coords is an array of 4-vectors containing coordinate space information
