@@ -297,7 +297,79 @@ def get_unique_elements(lattice, autodrifts = False):
 
 ###################### Chromaticity Correction Scripts ####################################
 
-def chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
+def correct_chromaticity(l_s,p_list,n_list,cx,cy=None,verbosity=True):
+    '''
+    Adjust a lattice to meet a desired chromaticity goal in each plane.
+
+    Computes a cost equal to the sum of squared values of sexutpole strengths for the combined
+    list of sextupole strengths, prints that cost, and returns it.
+
+    Arguments:
+        l_s (Synergia.lattice.lattice): Synergia lattice simulator object
+        p_list (list): list of positive sextupole lattice element names which should be varied
+        n_list (list): list of negative sextupole lattice element names which should be varied
+        cx (float): goal value for horizontal chromaticity
+        cy (Optional[float]) - goal value for vertical chromaticity. Default value is cy=cx.
+        verbosity (Optional[Bool]) - If true, print cost of chromatic correction - Cost is sum of squared strengths
+
+    Returns:
+        cost (float): The sum of squared values of sextupole strengths across the list of sextupoles strengths.
+    '''
+
+    c_tol = 1.e-3
+    c_tol = 1.
+    cx_goal = cx
+    if cy:
+        cy_goal = cy
+    else:
+        cy_goal = cx_goal
+
+    #make sure we grab the correct elements to adjust
+    lattice = l_s.get_lattice()
+    p_s = [ele for ele in lattice.get_elements() if ele.get_name() in p_list]
+    n_s = [ele for ele in lattice.get_elements() if ele.get_name() in n_list]
+
+    #adjust the chromaticity
+    #Note - default max steps is 6
+    l_s.adjust_chromaticities(cx_goal,cy_goal,p_s,n_s,c_tol,100)
+
+    cv_final = l_s.get_vertical_chromaticity()
+    cx_final = l_s.get_horizontal_chromaticity()
+    
+    adjusted = {}
+    adjusted['cx'] = cx_final
+    adjusted['cv'] = cv_final
+    adjusted['elements'] = {}
+    
+    #for ele in p_s:
+    #     adjusted['elements'].update({ele.get_name(),ele.get_double_attribute('k2')})
+    #for ele in n_s:
+    #     adjusted['elements'].update({ele.get_name(),ele.get_double_attribute('k2')})        
+    
+    #calculate Cost function
+    cost = 0
+    cost += np.sum([np.abs(ele.get_double_attribute('k2')) for ele in p_s]) #add p_s contributions
+    cost += np.sum([np.abs(ele.get_double_attribute('k2')) for ele in n_s]) #add n_s contributions
+    
+    
+    #Now update lattice and lattice simulator
+    return lattice, l_s
+    
+    
+    if verbosity:
+        print 'Adjusted chromaticities to new values: Cx = {} , Cy = {}'.format(cx_final, cv_final)
+        print ''
+
+        for ele in p_s:
+            print "New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2'))
+        for ele in n_s:
+            print "New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2'))
+
+        print 'Calculated Cost Function: {}'.format(cost)
+
+    #return adjusted
+
+def calc_chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
     '''
     Adjust a lattice to meet a desired chromaticity goal in each plane.
 
@@ -391,7 +463,7 @@ def generate_stepper(lattice, coll_operator, opts):
     """
 
 
-    requested_stepper = opts.stepper
+    requested_stepper = opts.requested_stepper
 
     if requested_stepper == "splitoperator":
         print "Using split-operator stepper with ", opts.steps, " steps/turn"
@@ -422,7 +494,6 @@ def set_lattice_element_type(lattice, opts):
     Adjusts the string attributes of each element in the lattice to reflect the desired extraction type and propagation type.
     May also be used to set an aperture for all elements.
 
-
     Arguments:
         lattice (Synergia.lattice.lattice): A Synergia lattice object
         opts (options.Options): A Synergia options instance
@@ -430,7 +501,6 @@ def set_lattice_element_type(lattice, opts):
     Returns:
         lattice (Synergia.lattice.lattice): The Synergia lattice object, updated with string attributes
     """
-
 
     for elem in lattice.get_elements():
         #set an aperture if specified
