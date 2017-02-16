@@ -2,6 +2,8 @@ import os
 import synergia
 import numpy as np
 import tables
+#import argparse
+import inspect
 from mpi4py import MPI
 
 # load the particles that will be used for the simulation
@@ -89,16 +91,31 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
 
 
     # create a bunch with the correct number of macro particles
-    bunch = synergia.bunch.Bunch(
-        refpart,
-        num_total_particles, real_particles, comm)
-    bunch.set_z_period_length(bucket_length)
-    
-    #Changed from older version (2/14/2017)
     #bunch = synergia.bunch.Bunch(
-    #   refpart,
-    #   num_total_particles, real_particles, comm,
-    #   bucket_length)
+    #    refpart,
+    #    num_total_particles, real_particles, comm)
+    #bunch.set_z_period_length(bucket_length)
+    
+    #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
+    #Using old constructor throws an ArgumentError of a non-standard type.
+    # Using a try and except to handle both instances.
+    try:
+        # try the original constructor
+        bunch = synergia.bunch.Bunch(
+            refpart,
+            num_total_particles, real_particles, comm,
+            bucket_length)
+    except Exception, e:
+        #look to see if it's an ArgumentError by evaluating the traceback
+        if (not str(e).startswith("Python argument types in")):
+            raise
+        else:
+            # use the new constructor
+            print "Using updated bunch constructor"
+            bunch = synergia.bunch.Bunch(
+                refpart,
+                num_total_particles, real_particles, comm)
+            bunch.set_z_period_length(bucket_length)
 
     local_num = bunch.get_local_num()
     local_particles = bunch.get_local_particles()
@@ -159,16 +176,31 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
 
 
     # create a bunch with the correct number of macro particles
-    bunch = synergia.bunch.Bunch(
-        refpart,
-        num_total_particles, real_particles, comm)
-    bunch.set_z_period_length(bucket_length)
-    
-    #Changed from older version (2/14/2017)
     #bunch = synergia.bunch.Bunch(
-    #   refpart,
-    #   num_total_particles, real_particles, comm,
-    #   bucket_length)
+    #    refpart,
+    #    num_total_particles, real_particles, comm)
+    #bunch.set_z_period_length(bucket_length)
+    
+    #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
+    #Using old constructor throws an ArgumentError of a non-standard type.
+    # Using a try and except to handle both instances.
+    try:
+        # try the original constructor
+        bunch = synergia.bunch.Bunch(
+            refpart,
+            num_total_particles, real_particles, comm,
+            bucket_length)
+    except Exception, e:
+        #look to see if it's an ArgumentError by evaluating the traceback
+        if (not str(e).startswith("Python argument types in")):
+            raise
+        else:
+            # use the new constructor
+            print "Using updated bunch constructor"
+            bunch = synergia.bunch.Bunch(
+                refpart,
+                num_total_particles, real_particles, comm)
+            bunch.set_z_period_length(bucket_length)
 
     local_num = bunch.get_local_num()
     local_particles = bunch.get_local_particles()
