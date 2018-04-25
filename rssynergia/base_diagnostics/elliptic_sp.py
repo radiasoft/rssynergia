@@ -372,18 +372,9 @@ def get_lost_particle_list(opts):
         indices1 = particles1[:,6]
         indices2 = particles2[:,6]
     
-        combined_index = np.append(indices1,indices2)
-        s = np.sort(combined_index)
-        ci_shared = s[s[1:] == s[:-1]] #list of those that remain
-        ci_full = [int(ind) for ind in np.unique(combined_index)] #full list
-        lost_vals = np.delete(ci_full, ci_shared) #lost values
-
-        if not len(lost_vals) == len(ci_full) - len(ci_shared):
-            #Print a sequence of warnings and some debug information
-            print "Warning: Length of lost list is not equal to number of lost particles!"
-            print "{} values are shared out of {} total values.".format(len(ci_shared),len(ci_full))
-            print "Therefore there are {} lost values.".format(len(ci_full)-len(ci_shared))
-            print "However I caclulate the length of the lost array to be {}.".format(len(lost_vals))
+        #take the intersection of the id values and subtract
+        same_vals = np.intersect1d(indices1,indices2)
+        lost_vals = np.delete(indices1,same_vals)
     
     return np.asarray(lost_vals)
     
