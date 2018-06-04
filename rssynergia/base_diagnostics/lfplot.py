@@ -51,6 +51,9 @@ def lf_plot(lf_info, opts):
         ax.plot(ss, y, label=fn_label)
         
     
+    #adjust axes limits
+    ax.set_xlim([0,max(ss)])
+    
     #add plot labels
     plt.xlabel('s', fontsize=18)
     plt.ylabel(', '.join(fn_labels), fontsize=18)

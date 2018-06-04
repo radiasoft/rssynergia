@@ -122,7 +122,7 @@ def plot_J(JArray,opts, ID=0):
         v = JArray[:opts.turns+1,ID]
     
     vinit = v[0] #take the iniital values as the normalization value
-    
+
     if opts.norm:
         vScale = v/vinit
         ymin = 0
@@ -137,7 +137,12 @@ def plot_J(JArray,opts, ID=0):
             ymin = (1-opts.variance)*vScale.mean()
         else:
             ymax = 1.05*vScale.max()
-            ymin = 0.95*vScale.min()            
+            ymin = 0.95*vScale.min()
+    
+    #specifying the range should override the plot max and min        
+    if opts.range:
+        ymin = opts.range[0]
+        ymax = opts.range[1]            
     
     fig = plt.figure(figsize=(8,6))
     plt.subplot(1,1,1)
