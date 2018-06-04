@@ -15,12 +15,29 @@ from mpi4py import MPI
 # input arguments:
 #    particles_file: the file name
 #    reference particle: the lattice reference particle for kinematic conversions
-#    real_particles: the real charge of the bunch
+#    num_real_particles: the number of real particles in the bunch
 #    bucket_length: the longitudinal length of the bucket
 #    comm: the Commxx communicator object for this bunch
 #    verbose: be chatty about what's happening
 #  
 def read_bunch(particles_file, refpart, real_particles, bucket_length, comm, verbose=False):
+    '''
+    Read a bunch from file (either .txt, .h5, or .mxtxt (MAD-X txt file)) and construct a Synergia bunch object.
+    
+    Arguments:
+        - particles_file (string):                                      the file containing the particles coordinates
+        - refpart (synergia.foundation.foundation.Reference_particle):  the Synergia reference particle describing the bunch
+        - num_real_particles (float):                                   the number of real particles
+        - bucket_length (float):                                        the longitudinal length of the bucket in m
+        - comm (synergia.utils.parallel_utils.Commxx):                  the Commxx communicator object for this bunch
+        - verbose (Optional[Boolean]):                                  Flag for verbose feedback
+    
+    Returns:
+        -bunch: A Synergia bunch object is created in the current session
+    '''
+    
+    
+    
     name,extension = os.path.splitext(particles_file)
     if extension == ".mxtxt":
         return read_txt_particles(particles_file, refpart, real_particles, bucket_length, comm, True, verbose)
@@ -45,7 +62,7 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
     myrank = comm.get_rank()
     mpisize = comm.get_size()
     
-    if myrank==0:
+    if myrank==0 and verbose:
         if madx_format:
             print "Loading madX particles from txt file: ", particles_file
         else:
@@ -111,7 +128,8 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
             raise
         else:
             # use the new constructor
-            print "Using updated bunch constructor"
+            if verbose:
+                print "Using updated bunch constructor"
             bunch = synergia.bunch.Bunch(
                 refpart,
                 num_total_particles, real_particles, comm)
@@ -151,7 +169,7 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
     myrank = comm.get_rank()
     mpisize = comm.get_size()
     
-    if myrank==0:
+    if myrank==0 and verbose:
         print "Loading particles from h5 file: ", particles_file
 
     if myrank == 0:
@@ -196,7 +214,8 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
             raise
         else:
             # use the new constructor
-            print "Using updated bunch constructor"
+            if verbose:
+                print "Using updated bunch constructor"
             bunch = synergia.bunch.Bunch(
                 refpart,
                 num_total_particles, real_particles, comm)
