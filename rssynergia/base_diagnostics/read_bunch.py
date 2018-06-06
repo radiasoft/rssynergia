@@ -1,7 +1,8 @@
 import os
 import synergia
 import numpy as np
-import tables
+import h5py
+#import tables
 #import argparse
 import inspect
 from mpi4py import MPI
@@ -35,18 +36,18 @@ def read_bunch(particles_file, refpart, real_particles, bucket_length, comm, ver
     Returns:
         -bunch: A Synergia bunch object is created in the current session
     '''
-    
-    
-    
-    name,extension = os.path.splitext(particles_file)
-    if extension == ".mxtxt":
-        return read_txt_particles(particles_file, refpart, real_particles, bucket_length, comm, True, verbose)
-    elif extension == ".txt":
-        return read_txt_particles(particles_file, refpart, real_particles, bucket_length, comm, False, verbose)
-    elif extension == ".h5":
+        
+    try:
         return read_h5_particles(particles_file, refpart, real_particles, bucket_length, comm, verbose)
-    else:
-        raise RuntimeError, "unrecognized file format: %s"%extension
+    
+    except IOError:
+        #it's not an h5 file - so assert that it should be a text file
+        name,extension = os.path.splitext(particles_file)
+        
+        assert extension == '.txt' or extension == '.mxtxt', \
+        "Supported file types are hdf5 (.h5) and plain text (.txt/.mxtx)"
+        
+        return read_txt_particles(particles_file, refpart, real_particles, bucket_length, comm, extension == '.mxtxt', verbose)
 
 #====================================================================
 
@@ -173,10 +174,14 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
         print "Loading particles from h5 file: ", particles_file
 
     if myrank == 0:
-        h5 = tables.open_file(particles_file)
+        #h5 = tables.open_file(particles_file)
+        h5 = h5py.File(particles_file)
+        
         # use explicit int conversion otherwise there seems to
         # be a typepython->C++ type  mismatch of numpy.int64->int
-        num_total_particles = int(h5.root.particles.shape[0])
+        #num_total_particles = int(h5.root.particles.shape[0])
+        num_total_particles = int(h5['particles'].shape[0])
+        
         if verbose:
             print "Total of  ", num_total_particles, " particles from file"
         # broadcast num particles to all nodes
@@ -186,7 +191,7 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
         num_total_particles = MPI.COMM_WORLD.bcast(num_total_particles, root=0)
 
     if myrank == 0:
-        particles = h5.root.particles
+        particles = h5['particles']
         # make sure the data has the correct shape, either [n,6] without
         # particles IDs or [n,7] with particle IDs.
         if (particles.shape[1] != 7):
