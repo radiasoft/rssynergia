@@ -21,7 +21,7 @@ from mpi4py import MPI
 #    comm: the Commxx communicator object for this bunch
 #    verbose: be chatty about what's happening
 #  
-def read_bunch(particles_file, refpart, real_particles, bucket_length, comm, verbose=False):
+def read_bunch(particles_file, refpart, real_particles, comm, bucket_length = None, verbose=False):
     '''
     Read a bunch from file (either .txt, .h5, or .mxtxt (MAD-X txt file)) and construct a Synergia bunch object.
     
@@ -29,8 +29,8 @@ def read_bunch(particles_file, refpart, real_particles, bucket_length, comm, ver
         - particles_file (string):                                      the file containing the particles coordinates
         - refpart (synergia.foundation.foundation.Reference_particle):  the Synergia reference particle describing the bunch
         - num_real_particles (float):                                   the number of real particles
-        - bucket_length (float):                                        the longitudinal length of the bucket in m
         - comm (synergia.utils.parallel_utils.Commxx):                  the Commxx communicator object for this bunch
+        - bucket_length (Optional[float]):                              if specified, the longitudinal length of the bucket in m
         - verbose (Optional[Boolean]):                                  Flag for verbose feedback
     
     Returns:
@@ -106,13 +106,6 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
             
             if myrank == 0:
                 print "Read ", num_total_particles, " particles"
-
-
-    # create a bunch with the correct number of macro particles
-    #bunch = synergia.bunch.Bunch(
-    #    refpart,
-    #    num_total_particles, real_particles, comm)
-    #bunch.set_z_period_length(bucket_length)
     
     #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
     #Using old constructor throws an ArgumentError of a non-standard type.
@@ -134,7 +127,11 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
             bunch = synergia.bunch.Bunch(
                 refpart,
                 num_total_particles, real_particles, comm)
-            bunch.set_z_period_length(bucket_length)
+            # now set the new parameter 'z_period_length'
+            if bucket_lenth is not none:
+                bunch.set_z_period_length(bucket_length)
+            else:
+                bucket_length = 1. #fix this quantity
 
     local_num = bunch.get_local_num()
     local_particles = bunch.get_local_particles()
@@ -196,13 +193,6 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
         # particles IDs or [n,7] with particle IDs.
         if (particles.shape[1] != 7):
             raise RuntimeError, "input data shape %shas incorrect number of particle coordinates"%repr(particles.shape)
-
-
-    # create a bunch with the correct number of macro particles
-    #bunch = synergia.bunch.Bunch(
-    #    refpart,
-    #    num_total_particles, real_particles, comm)
-    #bunch.set_z_period_length(bucket_length)
     
     #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
     #Using old constructor throws an ArgumentError of a non-standard type.
@@ -223,8 +213,13 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
                 print "Using updated bunch constructor"
             bunch = synergia.bunch.Bunch(
                 refpart,
-                num_total_particles, real_particles, comm)
-            bunch.set_z_period_length(bucket_length)
+                num_total_particles, real_particles, comm)        
+            # now set the new parameter 'z_period_length'
+            if bucket_lenth is not none:
+                bunch.set_z_period_length(bucket_length)
+            else:
+                bucket_length = 1. #fix this quantity
+            
 
     local_num = bunch.get_local_num()
     local_particles = bunch.get_local_particles()
