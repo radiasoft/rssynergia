@@ -21,12 +21,12 @@ from mpi4py import MPI
 #    comm: the Commxx communicator object for this bunch
 #    verbose: be chatty about what's happening
 #  
-def read_bunch(particles_file, refpart, real_particles, comm, bucket_length = None, verbose=False):
+def read_bunch(particles, refpart, real_particles, comm, bucket_length = None, verbose=False):
     '''
     Read a bunch from file (either .txt, .h5, or .mxtxt (MAD-X txt file)) and construct a Synergia bunch object.
     
     Arguments:
-        - particles_file (string):                                      the file containing the particles coordinates
+        - particles (string or np.ndarray):                        EITHER a file containing particles coordinates OR an ndarray of coordinates
         - refpart (synergia.foundation.foundation.Reference_particle):  the Synergia reference particle describing the bunch
         - num_real_particles (float):                                   the number of real particles
         - comm (synergia.utils.parallel_utils.Commxx):                  the Commxx communicator object for this bunch
@@ -36,18 +36,34 @@ def read_bunch(particles_file, refpart, real_particles, comm, bucket_length = No
     Returns:
         -bunch: A Synergia bunch object is created in the current session
     '''
-        
+
+    #first attempt to load the particles as an h5 file       
     try:
-        return read_h5_particles(particles_file, refpart, real_particles, bucket_length, comm, verbose)
+        return read_h5_particles(particles, refpart, real_particles, bucket_length, comm, verbose)
+    
+    #it's not an h5 file - then there are two possibilities:
+    #1. It's another sort of file, in which case, an IOError will be thrown
+    #2. It's a numpy array, in which case a TypeError will be thrown
+    #Therefore, we will catch the IOErrror and process it as an input file to check if it's a legible text file
+    #Then we will catch the possible TypeError and process it for being a numpy array
     
     except IOError:
-        #it's not an h5 file - so assert that it should be a text file
-        name,extension = os.path.splitext(particles_file)
-        
+        #IOError, so it's a file but not an .h5 file
+        name,extension = os.path.splitext(particles)
+            
+        #assuming no error is thrown, we continue processing the file - whihc should be now either a .txt or .mxtxt
         assert extension == '.txt' or extension == '.mxtxt', \
-        "Supported file types are hdf5 (.h5) and plain text (.txt/.mxtx)"
-        
-        return read_txt_particles(particles_file, refpart, real_particles, bucket_length, comm, extension == '.mxtxt', verbose)
+        "Supported file types are hdf5 (.h5) and plain text (.txt/.mxtxt)"
+            
+        return read_txt_particles(particles, refpart, real_particles, bucket_length, comm, extension == '.mxtxt', verbose)
+                    
+    except TypeError:
+        #TypeError, so it's not a file - so we should check if it's a numpy array
+        #Had we checked the .txt read first, it would have return an AttributeError
+        assert isinstance(particles, np.ndarray), \
+        "Supported data types are numpy arrays only."
+            
+        return read_array_particles(particles, refpart, real_particles, bucket_length, comm, verbose)
 
 #====================================================================
 
@@ -55,6 +71,8 @@ def read_bunch(particles_file, refpart, real_particles, comm, bucket_length = No
 # synergia units
 
 def read_txt_particles(particles_file, refpart, real_particles, bucket_length, comm, madx_format, verbose):
+    """Read an array of particles from a text file"""
+    
     four_momentum = refpart.get_four_momentum()
     pmass = four_momentum.get_mass()
     E_0 = four_momentum.get_total_energy()
@@ -159,6 +177,8 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
 #==========================================================
 
 def read_h5_particles(particles_file, refpart, real_particles, bucket_length, comm, verbose):
+    """Read an array of particles from an HDF-5 file"""
+    
     four_momentum = refpart.get_four_momentum()
     pmass = four_momentum.get_mass()
     E_0 = four_momentum.get_total_energy()
@@ -244,6 +264,98 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
         local_particles[:,:] = lp[:,:]
 
     return bunch
+
+
+#==========================================================
+
+def read_array_particles(particle_array, refpart, real_particles, bucket_length, comm, verbose):
+    """Read an array of particles coordinates from memory"""
+    
+    four_momentum = refpart.get_four_momentum()
+    pmass = four_momentum.get_mass()
+    E_0 = four_momentum.get_total_energy()
+    p0c = four_momentum.get_momentum()
+
+    myrank = comm.get_rank()
+    mpisize = comm.get_size()
+    
+    if myrank==0 and verbose:
+        print "Loading particles from: ".format(particle_array)
+
+    if myrank == 0:
+        
+        # use explicit int conversion otherwise there seems to
+        # be a typepython->C++ type  mismatch of numpy.int64->int
+        #num_total_particles = int(h5.root.particles.shape[0])
+        num_total_particles = particle_array.shape[0]
+        
+        if verbose:
+            print "Total of  ", num_total_particles, " particles"
+        # broadcast num particles to all nodes
+        MPI.COMM_WORLD.bcast(num_total_particles, root=0)
+    else:
+        num_total_particles = None
+        num_total_particles = MPI.COMM_WORLD.bcast(num_total_particles, root=0)
+
+    if myrank == 0:
+        particles = particle_array
+        # make sure the data has the correct shape, either [n,6] without
+        # particles IDs or [n,7] with particle IDs.
+        if (particle_array.shape[1] != 7):
+            raise RuntimeError, "input data shape %shas incorrect number of particle coordinates"%repr(particles.shape)
+    
+    #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
+    #Using old constructor throws an ArgumentError of a non-standard type.
+    # Using a try and except to handle both instances.
+    try:
+        # try the original constructor
+        bunch = synergia.bunch.Bunch(
+            refpart,
+            num_total_particles, real_particles, comm,
+            bucket_length)
+    except Exception, e:
+        #look to see if it's an ArgumentError by evaluating the traceback
+        if (not str(e).startswith("Python argument types in")):
+            raise
+        else:
+            # use the new constructor
+            if verbose:
+                print "Using updated bunch constructor"
+            bunch = synergia.bunch.Bunch(
+                refpart,
+                num_total_particles, real_particles, comm)        
+            # now set the new parameter 'z_period_length'
+            if bucket_length is not None:
+                bunch.set_z_period_length(bucket_length)
+            else:
+                bucket_length = 1. #fix this quantity
+            
+
+    local_num = bunch.get_local_num()
+    local_particles = bunch.get_local_particles()
+
+    # Each processor will have a possibly different number of local particles.
+    # rank 0 has to find out how many each of them has and distribute them
+    n_particles_by_proc = MPI.COMM_WORLD.gather(local_num, 0)
+    if myrank == 0:
+        # copy in my particles
+        this_rank_start = 0
+        local_particles[:,:] = particle_array[0:local_num, :]
+        this_rank_start += local_num
+        # send particles out to other ranks
+        for r in range(1, mpisize):
+            this_rank_end = this_rank_start+n_particles_by_proc[r]
+            MPI.COMM_WORLD.send(obj=particles[this_rank_start:this_rank_end, :],
+                                dest=r)
+            this_rank_start += n_particles_by_proc[r]
+    else:
+        # I'm not rank 0.  Receive my particles
+        lp = MPI.COMM_WORLD.recv(source=0)
+        local_particles[:,:] = lp[:,:]
+
+    return bunch
+
+
 
 #================================================================
 
