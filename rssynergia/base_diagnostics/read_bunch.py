@@ -128,7 +128,7 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
                 refpart,
                 num_total_particles, real_particles, comm)
             # now set the new parameter 'z_period_length'
-            if bucket_lenth is not none:
+            if bucket_length is not none:
                 bunch.set_z_period_length(bucket_length)
             else:
                 bucket_length = 1. #fix this quantity
@@ -215,7 +215,7 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
                 refpart,
                 num_total_particles, real_particles, comm)        
             # now set the new parameter 'z_period_length'
-            if bucket_lenth is not none:
+            if bucket_length is not none:
                 bunch.set_z_period_length(bucket_length)
             else:
                 bucket_length = 1. #fix this quantity
