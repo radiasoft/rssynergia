@@ -8,7 +8,60 @@ License: http://www.apache.org/licenses/LICENSE-2.0.html
 
 Copyright (c) 2015 RadiaSoft LLC.  All Rights Reserved.
 
-### Create a Synergia development environment
+### Run Synergia on the RadiaSoft JupyterHub server
+
+    Point your browser to the following URL
+    https://jupyter.radiasoft.org
+    
+    Click on the "Sign in with GitHub" button
+    A GitHub login is required. If you're not already logged in, then please do so.
+    If you have not previously authorized the JupyterHub server on GitHub, please do so now.
+    If you see a green "My Server" button, then click on it.
+    If you see a Jupyter server home page, then look towards the upper right part of your browser.
+    Click the "New" button, then select "Terminal" from the dropdown menu.
+    The Jupyter commandline terminal window will open in a new tab.
+    
+    In the Jupyter terminal window, clone this repo as follows:
+    > git clone https://github.com/radiasoft/rssynergia
+    
+    Go back to the JupyterHub home page (i.e. the URL referenced above)
+    You should see that there is now a directory called 'rssynergia'
+    Drill down into this directory by clicking on directory names, to:
+    .../rssynergia/examples/drift_expansion/
+    
+    Click on the Jupyter notebook named "sc_drift_expansion.ipynb"
+    This opens the notebook.
+    Repeatedly hitting "shift-enter" on your keyboard will execute the cells one by one.
+
+
+### Create a Synergia development environment on the JupyterHub server
+    Work in the Jupyter terminal window you opened above.
+    You are in a Python2 environment in Fedora 27 linux
+    You are username "vagrant" 
+    You have sudo privileges with password "vagrant"
+    
+    By default, you are in directory /home/vagrant/jupyter/
+    Move to the 'radiasoft' working directory
+    > cd /home/vagrant/src/radiasoft
+
+#### Install and build Synergia2
+    Many particle accelerator and radiation codes have been installed.
+    You can see the build directories in the local subdirectory '/home/vagrant/src/radiasoft/codes'
+    However, these are not suitable for development.
+    
+    From within the .../radiasoft/ directory, follow the download instructions for the Synergia source code:
+    https://cdcvs.fnal.gov/redmine/projects/contract-synergia2/wiki/Download_and_build_the_current_Synergia_release
+
+    Assuming the build completed without errors, cd into the synergia source directory:
+    > cd /home/vagrant/src/radiasoft/synergia2-devel/build/synergia2
+    
+    Invoke the test suite in this directory via:
+    > make test
+    
+    If some of the tests don't pass, then please create an issue here describing the problem, with a screenshot:
+    https://github.com/radiasoft/rssynergia/issues
+
+### Create a Synergia development environment on your laptop or desktop
 
     Install VirtualBox on your computer
     https://www.virtualbox.org/wiki/Downloads
@@ -44,4 +97,8 @@ Copyright (c) 2015 RadiaSoft LLC.  All Rights Reserved.
     You have sudo privileges with password "vagrant"
     The directory /vagrant is synced with the local directory you created above.
     
+    Move to the 'radiasoft' working directory
+    > cd src/radiasoft
+    
+    Now you can follow the "Install and build Synergia2" instructions above
  
