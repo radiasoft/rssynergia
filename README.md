@@ -102,3 +102,7 @@ Copyright (c) 2015 RadiaSoft LLC.  All Rights Reserved.
     
     Now you can follow the "Install and build Synergia2" instructions above
  
+### View the Synergia2 source code
+    The source code is found in the following subdirectory
+    > cd /home/vagrant/src/radiasoft/synergia2-devel/build/synergia2/src/
+    
