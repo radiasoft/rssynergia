@@ -6,7 +6,7 @@ Read the Docs: http://rssynergia.readthedocs.org/en/latest/
 #### License
 License: http://www.apache.org/licenses/LICENSE-2.0.html
 
-Copyright (c) 2015 RadiaSoft LLC.  All Rights Reserved.
+Copyright (c) 2015-2018 RadiaSoft LLC.  All Rights Reserved.
 
 ### Run Synergia on the RadiaSoft JupyterHub server
 
