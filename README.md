@@ -1,5 +1,5 @@
-### RadiaSoft Synergia Support
-Support tools for [Synergia](https://web.fnal.gov/sites/Synergia).
+### RadiaSoft Synergia utilities
+Utilities for [Synergia](https://web.fnal.gov/sites/Synergia).
 
 Read the Docs: http://rssynergia.readthedocs.org/en/latest/
 
