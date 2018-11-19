@@ -85,8 +85,8 @@ def toyKVbeam6D(opts):
 
         if os.path.isfile(filename):
             newfilename = filename+str(int(time.time()))
-            print ' !Warning -- '
-            print 'File '+filename+' already exists. Renaming the old file to '+newfilename
+            print(' !Warning -- ')
+            print('File '+filename+' already exists. Renaming the old file to '+newfilename)
             os.rename('./'+filename, './'+newfilename)
 
         bunchfile = open(filename, 'w')

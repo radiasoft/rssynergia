@@ -52,7 +52,7 @@ def get_rms_envelope(dim, particles):
     elif dim == 'y':
         ind = [2,3]
     else:
-        print "Please specify 'x' or 'y' axis"
+        print("Please specify 'x' or 'y' axis")
   
     #get particles and assign w, w' 
     w = particles[:,ind[0]]
@@ -80,7 +80,7 @@ def get_emittance(dim, bunch):
     elif dim == 'y':
         ind = [2,3]
     else:
-        print "Please specify 'x' or 'y' axis"
+        print("Please specify 'x' or 'y' axis")
   
     #get particles and assign w, w' 
     particles = bunch.get_local_particles()
@@ -163,46 +163,46 @@ def calc_properties(bunch,ref):
     yp_vals = particles[:,3]
     
     xenv = np.sqrt(np.mean(x_vals**2))
-    print "rms envelope x: {} mm".format(xenv*1.e3)
+    print("rms envelope x: {} mm".format(xenv*1.e3))
     
     yenv = np.sqrt(np.mean(y_vals**2))
-    print "rms envelope y: {} mm".format(yenv*1.e3)
+    print("rms envelope y: {} mm".format(yenv*1.e3))
     
     xmax = np.max(x_vals)
-    print "maximum x value is : {} mm".format(xmax*1.e3)
+    print("maximum x value is : {} mm".format(xmax*1.e3))
     
     ymax = np.max(y_vals)
-    print "maximum y value is : {} mm".format(ymax*1.e3)
+    print("maximum y value is : {} mm".format(ymax*1.e3))
     
     xbet = np.mean(x_vals**2)/g_emit_x
-    print "rms beta x: {}".format(xbet)
+    print("rms beta x: {}".format(xbet))
     
     ybet = np.mean(y_vals**2)/g_emit_y
-    print "rms beta y: {}".format(ybet)
+    print("rms beta y: {}".format(ybet))
     
     emitx = get_emittance('x',bunch)
-    print "geometric emittance x: {} mm-mrad".format(emitx*1.e6)
+    print("geometric emittance x: {} mm-mrad".format(emitx*1.e6))
     
     emity = get_emittance('y',bunch)
-    print "geometric emittance y: {} mm-mrad".format(emity*1.e6)    
+    print("geometric emittance y: {} mm-mrad".format(emity*1.e6))    
         
     n_emitx = get_normalized_emittance('x',bunch,beta,gamma)
-    print "normalized emittance x: {} mm-mrad".format(n_emitx*1.e6)
+    print("normalized emittance x: {} mm-mrad".format(n_emitx*1.e6))
     
     n_emity = get_normalized_emittance('y',bunch,beta,gamma)
-    print "normalized emittance y: {} mm-mrad".format(n_emity*1.e6)
+    print("normalized emittance y: {} mm-mrad".format(n_emity*1.e6))
     
     x2_mean = np.mean(xp_vals**2)
-    print "mean of xp^2 : {}".format(x2_mean)
+    print("mean of xp^2 : {}".format(x2_mean))
     
     y2_mean = np.mean(yp_vals**2)
-    print "mean of yp^2 : {}".format(y2_mean)
+    print("mean of yp^2 : {}".format(y2_mean))
     
     emit_total_x = xmax**2/xbet
-    print "total geometric emittance x: {} mm-mrad".format(emit_total_x*1.e6)
+    print("total geometric emittance x: {} mm-mrad".format(emit_total_x*1.e6))
     
     emit_total_y = ymax**2/ybet
-    print "total geometric emittance y: {} mm-mrad".format(emit_total_y*1.e6)
+    print("total geometric emittance y: {} mm-mrad".format(emit_total_y*1.e6))
 
 
 def get_base_nll(l0, mu0, t, c):
@@ -329,4 +329,4 @@ def plot_bunch(particles_file, opts=None, part=None):
     plt.show()
     
     fig.savefig(svtitle, bbox_inches='tight')
-    print "Saving plot to",svtitle
+    print("Saving plot to",svtitle)

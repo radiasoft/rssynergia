@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import synergia
 import math
 import matplotlib
-import options
+from . import options
 
 
 

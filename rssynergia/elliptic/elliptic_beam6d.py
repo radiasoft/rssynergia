@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from elliptic_beam import EllipticBeam
+from .elliptic_beam import EllipticBeam
 from scipy import constants as consts
 import random, time
 import sys, os
@@ -99,8 +99,8 @@ def toyellipticalbeam6D(opts):
 
         if os.path.isfile(fileName):
             newFileName = fileName+str(int(time.time()))
-            print ' !Warning -- '
-            print 'File '+fileName+' already exists. Renaming the old file to '+newFileName
+            print(' !Warning -- ')
+            print('File '+fileName+' already exists. Renaming the old file to '+newFileName)
             os.rename('./'+fileName, './'+newFileName)
 
         bunchFile = open(fileName, 'w')
@@ -185,8 +185,8 @@ def fixedellipticalbeam6D(opts):
 
     if os.path.isfile(fileName):
         newFileName = fileName+str(int(time.time()))
-        print ' !Warning -- '
-        print 'File '+fileName+' already exists. Renaming the old file to '+newFileName
+        print(' !Warning -- ')
+        print('File '+fileName+' already exists. Renaming the old file to '+newFileName)
         os.rename('./'+fileName, './'+newFileName)
 
     bunchFile = open(fileName, 'w')

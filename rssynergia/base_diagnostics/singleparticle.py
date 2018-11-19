@@ -5,7 +5,7 @@ import numpy as np
 import math
 import matplotlib
 import matplotlib.pyplot as plt
-import options
+from . import options
 #from mpl_toolkits.axes_grid import make_axes_locatable
 #from mpl_toolkits import axes_grid
 
@@ -179,7 +179,7 @@ def plot_J(JArray,opts, ID=0):
         ID = opts.ID
    
     if opts.turns+1 > JArray.shape[0]:
-        print 'Not enough data to plot for {} turns. Plotting {} turns instead'.format(opts.turns,JArray.shape[0]-1)
+        print('Not enough data to plot for {} turns. Plotting {} turns instead'.format(opts.turns,JArray.shape[0]-1))
         h = np.arange(JArray.shape[0])*opts.turnsPerDiag #plus 1 to account for initial conditions
         v = JArray[::,ID]
     else:
@@ -926,7 +926,7 @@ def get_single_particle_elliptic_invariants(filelist, twiss, opts, lost, num=1):
             vals = second_invariant(norm_coords, u,v, opts)
         else:
             #otherwise calculate the first invariant
-            print "Improper invariant number specified. Calculating 1st invariant by default."
+            print("Improper invariant number specified. Calculating 1st invariant by default.")
             vals = single_particle_hamiltonian(norm_coords) + elliptic_hamiltonian(u,v,opts)
         
         invariant.append(vals)
@@ -1143,7 +1143,7 @@ def get_tracks(filelist, opts):
         vec = []
         for coord in opts.plots:
             #make sure specified plot options are obtainable
-            assert coord in coords.keys(), "Specified plot, %s is not available from: %s" %(coord, coords.keys())   
+            assert coord in list(coords.keys()), "Specified plot, %s is not available from: %s" %(coord, list(coords.keys()))   
             vec.append(particles[:,coords[coord]])
         tracks.append(vec)
         
@@ -1418,8 +1418,8 @@ def toy_stats_Invariant(hArray, opts):
     i_mean = np.mean(array2) * 1.e6
     i_std = np.std(array2) * 1.e6
     
-    print "H -  Mean: " + str(h_mean) + " [mm-mrad] std (%): " + str(100*h_std/h_mean)
-    print "I -  Mean: " + str(i_mean) + " [mm-mrad] std (%): " + str(100*i_std/i_mean)
+    print("H -  Mean: " + str(h_mean) + " [mm-mrad] std (%): " + str(100*h_std/h_mean))
+    print("I -  Mean: " + str(i_mean) + " [mm-mrad] std (%): " + str(100*i_std/i_mean))
 
 
 def stats_Invariant(hArray, opts):
@@ -1439,8 +1439,8 @@ def stats_Invariant(hArray, opts):
     i_mean = np.mean(array2) * 1.e6
     i_std = np.std(array2) * 1.e6
     
-    print "H -  Mean: " + str(h_mean) + " [mm-mrad] std (%): " + str(100*h_std/h_mean)
-    print "I -  Mean: " + str(i_mean) + " [mm-mrad] std (%): " + str(100*i_std/i_mean)
+    print("H -  Mean: " + str(h_mean) + " [mm-mrad] std (%): " + str(100*h_std/h_mean))
+    print("I -  Mean: " + str(i_mean) + " [mm-mrad] std (%): " + str(100*i_std/i_mean))
        
 
 def plot_H_I(opts):

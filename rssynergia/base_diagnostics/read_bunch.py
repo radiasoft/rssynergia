@@ -83,9 +83,9 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
     
     if myrank==0 and verbose:
         if madx_format:
-            print "Loading madX particles from txt file: ", particles_file
+            print(("Loading madX particles from txt file: ", particles_file))
         else:
-            print "Loading Synergia particles from txt file: ", particles_file
+            print(("Loading Synergia particles from txt file: ", particles_file))
 
     if myrank == 0:
         particles = np.loadtxt(particles_file)
@@ -100,7 +100,7 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
         # make sure the data has the correct shape, either [n,6] without
         # particles IDs or [n,7] with particle IDs.
         if (particles.shape[1] != 6) and (particles.shape[1] != 7):
-            raise RuntimeError, "input data shape %shas incorrect number of particle coordinates"%repr(particles.shape)
+            raise RuntimeError("input data shape %shas incorrect number of particle coordinates"%repr(particles.shape))
         
         
         if madx_format:
@@ -123,7 +123,7 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
             particles_w_id = particles
             
             if myrank == 0:
-                print "Read ", num_total_particles, " particles"
+                print(("Read ", num_total_particles, " particles"))
     
     #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
     #Using old constructor throws an ArgumentError of a non-standard type.
@@ -134,14 +134,14 @@ def read_txt_particles(particles_file, refpart, real_particles, bucket_length, c
             refpart,
             num_total_particles, real_particles, comm,
             bucket_length)
-    except Exception, e:
+    except Exception as e:
         #look to see if it's an ArgumentError by evaluating the traceback
         if (not str(e).startswith("Python argument types in")):
             raise
         else:
             # use the new constructor
             if verbose:
-                print "Using updated bunch constructor"
+                print("Using updated bunch constructor")
             bunch = synergia.bunch.Bunch(
                 refpart,
                 num_total_particles, real_particles, comm)
@@ -188,7 +188,7 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
     mpisize = comm.get_size()
     
     if myrank==0 and verbose:
-        print "Loading particles from h5 file: ", particles_file
+        print(("Loading particles from h5 file: ", particles_file))
 
     if myrank == 0:
         #h5 = tables.open_file(particles_file)
@@ -200,7 +200,7 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
         num_total_particles = int(h5['particles'].shape[0])
         
         if verbose:
-            print "Total of  ", num_total_particles, " particles from file"
+            print(("Total of  ", num_total_particles, " particles from file"))
         # broadcast num particles to all nodes
         MPI.COMM_WORLD.bcast(num_total_particles, root=0)
     else:
@@ -212,7 +212,7 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
         # make sure the data has the correct shape, either [n,6] without
         # particles IDs or [n,7] with particle IDs.
         if (particles.shape[1] != 7):
-            raise RuntimeError, "input data shape %shas incorrect number of particle coordinates"%repr(particles.shape)
+            raise RuntimeError("input data shape %shas incorrect number of particle coordinates"%repr(particles.shape))
     
     #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
     #Using old constructor throws an ArgumentError of a non-standard type.
@@ -223,14 +223,14 @@ def read_h5_particles(particles_file, refpart, real_particles, bucket_length, co
             refpart,
             num_total_particles, real_particles, comm,
             bucket_length)
-    except Exception, e:
+    except Exception as e:
         #look to see if it's an ArgumentError by evaluating the traceback
         if (not str(e).startswith("Python argument types in")):
             raise
         else:
             # use the new constructor
             if verbose:
-                print "Using updated bunch constructor"
+                print("Using updated bunch constructor")
             bunch = synergia.bunch.Bunch(
                 refpart,
                 num_total_particles, real_particles, comm)        
@@ -280,7 +280,7 @@ def read_array_particles(particle_array, refpart, real_particles, bucket_length,
     mpisize = comm.get_size()
     
     if myrank==0 and verbose:
-        print "Loading particles from: ".format(particle_array)
+        print(("Loading particles from: ".format(particle_array)))
 
     if myrank == 0:
         
@@ -290,7 +290,7 @@ def read_array_particles(particle_array, refpart, real_particles, bucket_length,
         num_total_particles = particle_array.shape[0]
         
         if verbose:
-            print "Total of  ", num_total_particles, " particles"
+            print(("Total of  ", num_total_particles, " particles"))
         # broadcast num particles to all nodes
         MPI.COMM_WORLD.bcast(num_total_particles, root=0)
     else:
@@ -302,7 +302,7 @@ def read_array_particles(particle_array, refpart, real_particles, bucket_length,
         # make sure the data has the correct shape, either [n,6] without
         # particles IDs or [n,7] with particle IDs.
         if (particle_array.shape[1] != 7):
-            raise RuntimeError, "input data shape %shas incorrect number of particle coordinates"%repr(particles.shape)
+            raise RuntimeError("input data shape %shas incorrect number of particle coordinates"%repr(particles.shape))
     
     #Note: Synergia bunch constructor updated - commit 077b99d7 - 11/17/2016
     #Using old constructor throws an ArgumentError of a non-standard type.
@@ -313,14 +313,14 @@ def read_array_particles(particle_array, refpart, real_particles, bucket_length,
             refpart,
             num_total_particles, real_particles, comm,
             bucket_length)
-    except Exception, e:
+    except Exception as e:
         #look to see if it's an ArgumentError by evaluating the traceback
         if (not str(e).startswith("Python argument types in")):
             raise
         else:
             # use the new constructor
             if verbose:
-                print "Using updated bunch constructor"
+                print("Using updated bunch constructor")
             bunch = synergia.bunch.Bunch(
                 refpart,
                 num_total_particles, real_particles, comm)        
@@ -366,11 +366,11 @@ def print_bunch_stats(bunch):
     means = synergia.bunch.Core_diagnostics().calculate_mean(bunch)
     stds = synergia.bunch.Core_diagnostics().calculate_std(bunch, means)
     if myrank == 0:
-        print "%20s   %20s   %20s"%("coord","mean","rms")
-        print "%20s   %20s   %20s"%("====================",
+        print(("%20s   %20s   %20s"%("coord","mean","rms")))
+        print(("%20s   %20s   %20s"%("====================",
                                     "====================",
-                                    "====================")
+                                    "====================")))
         for i in range(6):
-            print "%20s   %20.12e   %20.12e"%(coord_names[i], means[i], stds[i])
+            print(("%20s   %20.12e   %20.12e"%(coord_names[i], means[i], stds[i])))
 
 #=========================================================

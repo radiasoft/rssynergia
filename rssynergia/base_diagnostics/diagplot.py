@@ -44,8 +44,8 @@ def generate_plotparams():
     
     
     plotparams = {}
-    for label in coords.keys():
-        for label2 in coords.keys():
+    for label in list(coords.keys()):
+        for label2 in list(coords.keys()):
             if coords[label2] > coords[label]:
                 corr = label + '_' + label2 + '_corr'
                 plotparams[corr] = Params(corr, 's', 'corr',
@@ -204,7 +204,7 @@ def diagPlot(opts, start=None, length=None):
     #counting index
     index = 0
     
-    for key in plotVals.keys():
+    for key in list(plotVals.keys()):
         #add name to names list and y-values to yvalues list
         nm = ''
         if not(key == 's'):

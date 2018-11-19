@@ -66,11 +66,11 @@ def make_opts(name, order, outputdir, steps, steps_per_element, **kwargs):
     #opts.add("allmaps", False, "Use all maps for propagation", bool)
     opts.add("stepper", "splitoperator", "Simulation stepper, either 'independent','elements','splitoperator','soelements'", str)
     
-    for key,vals in kwargs.items():
+    for key,vals in list(kwargs.items()):
 
     #Quick and dirty overwrite
         if opts.has_option(key):
-            print "Overwriting option " + key
+            print("Overwriting option " + key)
             setattr(opts,key, vals[0])
         else:
             if len(vals) == 3:

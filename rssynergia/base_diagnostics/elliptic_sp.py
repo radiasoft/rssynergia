@@ -12,7 +12,7 @@ import numpy as np
 import math
 import matplotlib
 import matplotlib.pyplot as plt
-import options
+from . import options
 import synergia
 
 coords = {}
@@ -114,7 +114,7 @@ def plot_J(JArray,opts, ID=0):
         ID = opts.ID
    
     if opts.turns+1 > JArray.shape[0]:
-        print 'Not enough data to plot for {} turns. Plotting {} turns instead'.format(opts.turns,JArray.shape[0]-1)
+        print('Not enough data to plot for {} turns. Plotting {} turns instead'.format(opts.turns,JArray.shape[0]-1))
         h = np.arange(JArray.shape[0]) #plus 1 to account for initial conditions
         v = JArray[::,ID]
     else:
@@ -654,7 +654,7 @@ def get_single_particle_elliptic_invariants(filelist, twiss, opts, lost, num=1):
             vals = second_invariant(norm_coords, u,v, opts)
         else:
             #otherwise calculate the first invariant
-            print "Improper invariant number specified. Calculating 1st invariant by default."
+            print("Improper invariant number specified. Calculating 1st invariant by default.")
             vals = single_particle_hamiltonian(norm_coords) + elliptic_hamiltonian(u,v,opts)
         
         invariant.append(vals)
@@ -715,7 +715,7 @@ def get_adjusted_elliptic_invariants(filelist, twiss, opts, lost, num=1):
             vals = second_invariant(norm_coords, u,v, opts)
         else:
             #otherwise calculate the first invariant
-            print "Improper invariant number specified. Calculating 1st invariant by default."
+            print("Improper invariant number specified. Calculating 1st invariant by default.")
             vals = single_particle_hamiltonian(norm_coords) + np.multiply(t_ratio,elliptic_hamiltonian(u,v,opts))
         
         invariant.append(vals)
@@ -1684,7 +1684,7 @@ def toy_analyze_invariant(opts):
     pRange = len(hAfter[0])  #define this particle range to correspond to the total number of particles left
     
     if not pRange == opts.num_total_particles:
-           print "Adjusting analysis to account for lost particles"
+           print("Adjusting analysis to account for lost particles")
     
     for ind in range(pRange):
         
@@ -1739,7 +1739,7 @@ def analyze_invariant(opts):
     pRange = len(hAfter[0])  #define this particle range to correspond to the total number of particles left
     
     if not pRange == opts.num_total_particles:
-           print "Adjusting analysis to account for lost particles"
+           print("Adjusting analysis to account for lost particles")
     
     for ind in range(pRange):
         

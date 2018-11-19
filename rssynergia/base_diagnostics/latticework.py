@@ -46,7 +46,7 @@ def get_phase_advance(ls, ele0, ele1, x=True):
                 begin = lf.psi_y
 
             endpoint = arclengths[index] #endpoint of slice
-            print "Element {} is at position {} with dispersion Dx = {}".format(ele0,endpoint,lf.D_x)
+            print("Element {} is at position {} with dispersion Dx = {}".format(ele0,endpoint,lf.D_x))
 
         if part.get_lattice_element().get_name() == ele1:
             #print "Found {}".format(ele1)
@@ -58,13 +58,13 @@ def get_phase_advance(ls, ele0, ele1, x=True):
                 end = lf.psi_y
 
             endpoint = arclengths[index] #endpoint of slice
-            print "Element {} is at position {} with dispersion Dx = {}".format(ele1,endpoint,lf.D_x)
+            print("Element {} is at position {} with dispersion Dx = {}".format(ele1,endpoint,lf.D_x))
 
     if not e0check:
-        print "Element {} not found".format(ele0)
+        print("Element {} not found".format(ele0))
         return 0
     elif not e1check:
-        print "Element {} not found".format(ele1)
+        print("Element {} not found".format(ele1))
         return 0
 
     advance = (end - begin)/np.piIOTA
@@ -76,11 +76,11 @@ def get_phase_advance(ls, ele0, ele1, x=True):
         coord = 'y'
 
     if advance < 0:
-        print "Elements specified out of order"
-        print "Elements {} and {} are separated by a phase advance in {} of {}".format(ele0, ele1,coord, advance)
+        print("Elements specified out of order")
+        print("Elements {} and {} are separated by a phase advance in {} of {}".format(ele0, ele1,coord, advance))
         return -1.*advance
 
-    print "Elements {} and {} are separated by an phase advance in {} of {}".format(ele0, ele1,coord, advance)
+    print("Elements {} and {} are separated by an phase advance in {} of {}".format(ele0, ele1,coord, advance))
 
     return advance
 
@@ -234,26 +234,26 @@ def print_strengths(elemslist, unique=True):
             if unique:
                 #only print new strengths
                 if strength not in strengths:
-                    print elem.get_name() + ' K: ' + str(elem.get_double_attribute("k1"))
+                    print(elem.get_name() + ' K: ' + str(elem.get_double_attribute("k1")))
                     strengths.append(strength)
                 else:
                     pass
             else:
                 #print all strengths
-                print elem.get_name() + ' K: ' + str(elem.get_double_attribute("k1"))
+                print(elem.get_name() + ' K: ' + str(elem.get_double_attribute("k1")))
         #do the same for sextupoles
         if elem.get_type() == "sextupole":
             strength = elem.get_double_attribute("k2")
             if unique:
                 #only print new strengths
                 if strength not in strengths:
-                    print elem.get_name() + ' K2: ' + str(elem.get_double_attribute("k2"))
+                    print(elem.get_name() + ' K2: ' + str(elem.get_double_attribute("k2")))
                     strengths.append(strength)
                 else:
                     pass
             else:
                 #print all strengths
-                print elem.get_name() + ' K2: ' + str(elem.get_double_attribute("k2"))
+                print(elem.get_name() + ' K2: ' + str(elem.get_double_attribute("k2")))
 
 
 def get_unique_elements(lattice, autodrifts = False):
@@ -357,15 +357,15 @@ def correct_chromaticity(l_s,p_list,n_list,cx,cy=None,verbosity=True):
     
     
     if verbosity:
-        print 'Adjusted chromaticities to new values: Cx = {} , Cy = {}'.format(cx_final, cv_final)
-        print ''
+        print('Adjusted chromaticities to new values: Cx = {} , Cy = {}'.format(cx_final, cv_final))
+        print('')
 
         for ele in p_s:
-            print "New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2'))
+            print("New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2')))
         for ele in n_s:
-            print "New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2'))
+            print("New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2')))
 
-        print 'Calculated Cost Function: {}'.format(cost)
+        print('Calculated Cost Function: {}'.format(cost))
 
     #return adjusted
 
@@ -406,20 +406,20 @@ def calc_chromaticity_adjust(l_s, p_list, n_list, cx, cy = None):
 
     cv_final = l_s.get_vertical_chromaticity()
     cx_final = l_s.get_horizontal_chromaticity()
-    print 'Adjusted chromaticities to new values: Cx = {} , Cy = {}'.format(cx_final, cv_final)
-    print ''
+    print('Adjusted chromaticities to new values: Cx = {} , Cy = {}'.format(cx_final, cv_final))
+    print('')
 
     for ele in p_s:
-        print "New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2'))
+        print("New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2')))
     for ele in n_s:
-        print "New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2'))
+        print("New k2 value for element {}: {}".format(ele.get_name(), ele.get_double_attribute('k2')))
 
     #calculate Cost function
     cost = 0
     cost += np.sum([np.abs(ele.get_double_attribute('k2')) for ele in p_s]) #add p_s contributions
     cost += np.sum([np.abs(ele.get_double_attribute('k2')) for ele in n_s]) #add n_s contributions
 
-    print 'Calculated Cost Function: {}'.format(cost)
+    print('Calculated Cost Function: {}'.format(cost))
 
     return cost
 
@@ -442,7 +442,7 @@ def get_starting_lf(lattice_simulator):
     slices = lattice_simulator.get_slices()
     lf = lattice_simulator.get_lattice_functions(slices[0])
 
-    print "Initial starting lattice functions: betax = {}, betay = {}, alphax = {}, alphay = {}".format(lf.beta_x,lf.beta_y,lf.alpha_x,lf.alpha_y)
+    print("Initial starting lattice functions: betax = {}, betay = {}, alphax = {}, alphay = {}".format(lf.beta_x,lf.beta_y,lf.alpha_x,lf.alpha_y))
 
     return lf.beta_x,lf.beta_y,lf.alpha_x,lf.alpha_y
 
@@ -466,23 +466,23 @@ def generate_stepper(lattice, coll_operator, opts):
     requested_stepper = opts.requested_stepper
 
     if requested_stepper == "splitoperator":
-        print "Using split-operator stepper with ", opts.steps, " steps/turn"
+        print("Using split-operator stepper with ", opts.steps, " steps/turn")
         stepper = synergia.simulation.Split_operator_stepper(lattice, opts.map_order, coll_operator, opts.steps)
 
     elif requested_stepper == "soelements":
-        print "Using split-operator stepper elements with ", opts.steps_per_element, " steps/element"
+        print("Using split-operator stepper elements with ", opts.steps_per_element, " steps/element")
         stepper = synergia.simulation.Split_operator_stepper_elements(lattice, opts.map_order, coll_operator, opts.steps_per_element)
 
     elif requested_stepper == "independent":
-        print "Using independent-operator stepper with ", opts.steps, " steps/turn"
+        print("Using independent-operator stepper with ", opts.steps, " steps/turn")
         stepper = synergia.simulation.Independent_stepper(lattice, opts.map_order, opts.steps)
 
     elif requested_stepper == "elements":
-        print "Using step-by-elements-operator stepper with ", opts.steps_per_element, " steps/element"
+        print("Using step-by-elements-operator stepper with ", opts.steps_per_element, " steps/element")
         stepper = synergia.simulation.Independent_stepper_elements(lattice, opts.map_order, opts.steps_per_element)
 
     else:
-        raise RuntimeError, "stepper %s invalid, must be either 'splitoperator', 'independent' or 'elements'"%requested_stepper
+        raise RuntimeError("stepper %s invalid, must be either 'splitoperator', 'independent' or 'elements'"%requested_stepper)
 
 
     return stepper
@@ -523,7 +523,7 @@ def set_lattice_element_type(lattice, opts):
             else:
                 elem.set_string_attribute("extractor_type", "chef_propagate")
         else:
-            raise RuntimeError, "bad options for use_maps: %d"%opts.use_maps
+            raise RuntimeError("bad options for use_maps: %d"%opts.use_maps)
 
     return lattice
 
@@ -549,25 +549,25 @@ def compare_lattices(lattice1, lattice2):
     l1 = len(elems1)
     l2 = len(elems2)
 
-    print "Lattice 1 has " + str(l1) + " elements."
-    print "Lattice 2 has " + str(l2) + " elements."
-    print
+    print("Lattice 1 has " + str(l1) + " elements.")
+    print("Lattice 2 has " + str(l2) + " elements.")
+    print()
 
-    l1_keys = elems1.keys()
-    l2_keys = elems2.keys()
+    l1_keys = list(elems1.keys())
+    l2_keys = list(elems2.keys())
 
     l_shared = set(l1_keys).intersection(l2_keys) #return shared items for each lattice
     l1_unique = set(l1_keys).difference(l2_keys) #return items unique to lattice 1
     l2_unique = set(l2_keys).difference(l1_keys) #return items unique to lattice 2
 
-    print "Lattice 1 has " + str(len(l1_unique)) + " unique elements :"
-    print [element for element in l1_unique]
-    print
-    print "Lattice 2 has " + str(len(l2_unique)) + " unique elements :"
-    print [element for element in l2_unique]
-    print
-    print "The lattices have " + str(len(l_shared)) + " shared elements."
-    print
+    print("Lattice 1 has " + str(len(l1_unique)) + " unique elements :")
+    print([element for element in l1_unique])
+    print()
+    print("Lattice 2 has " + str(len(l2_unique)) + " unique elements :")
+    print([element for element in l2_unique])
+    print()
+    print("The lattices have " + str(len(l_shared)) + " shared elements.")
+    print()
 
     counter = 0
     #for index, elem in enumerate(elems1):
@@ -580,34 +580,34 @@ def compare_lattices(lattice1, lattice2):
             da1 = elem.get_double_attributes()
             da2 = elem2.get_double_attributes()
 
-            da1keys = da1.keys()
-            da2keys = da2.keys()
+            da1keys = list(da1.keys())
+            da2keys = list(da2.keys())
 
             if da1keys == da2keys: #check double attribute keys
                 for dkey in da1keys: #check double attribute values
                     if not da1[dkey] == da2[dkey]:
-                        print 'Variation in element double attribute for element ' + str(dkey) + ' of type ' + elem.get_type()
-                        print 'Lattice 1 element ' + str(elem.get_name()) + ' has value ' + str(da1[dkey])
-                        print 'Lattice 2 element ' + str(elem2.get_name()) + '  has value ' + str(da2[dkey])
+                        print('Variation in element double attribute for element ' + str(dkey) + ' of type ' + elem.get_type())
+                        print('Lattice 1 element ' + str(elem.get_name()) + ' has value ' + str(da1[dkey]))
+                        print('Lattice 2 element ' + str(elem2.get_name()) + '  has value ' + str(da2[dkey]))
                         counter += 1
             else:
                 #ignore the 'deposited_charge' attribute
                 #print set(da1keys).symmetric_difference(da2keys)
                 if not set(da1keys).symmetric_difference(da2keys) == set(['deposited_charge']):
-                    print 'Variation in element double attribute keys for element ' + str(key) + ' of type ' + elem.get_type()
-                    print 'Lattice 1 element ' + str(elem.get_name()) + ' has double attributes ' + str([key for key in da1.keys()])
-                    print 'Lattice 2 element ' + str(elem2.get_name()) + '  has double attribues ' + str([key for key in da2.keys()])
+                    print('Variation in element double attribute keys for element ' + str(key) + ' of type ' + elem.get_type())
+                    print('Lattice 1 element ' + str(elem.get_name()) + ' has double attributes ' + str([key for key in list(da1.keys())]))
+                    print('Lattice 2 element ' + str(elem2.get_name()) + '  has double attribues ' + str([key for key in list(da2.keys())]))
                     counter += 1
                 else:
                     pass
         else:
-            print 'Variation in element type for element ' + str(key)
-            print 'Lattice 1 element ' + str(elem.get_name()) + ' has type ' + elem.get_type()
-            print 'Lattice 2 element ' + str(elem2.get_name()) + ' has type ' + elem2.get_type()
+            print('Variation in element type for element ' + str(key))
+            print('Lattice 1 element ' + str(elem.get_name()) + ' has type ' + elem.get_type())
+            print('Lattice 2 element ' + str(elem2.get_name()) + ' has type ' + elem2.get_type())
             counter += 1
 
 
-    print 'There are ' + str(counter) + ' element specific variations in the shared elements of the lattices.'
+    print('There are ' + str(counter) + ' element specific variations in the shared elements of the lattices.')
 
 
 
@@ -647,7 +647,7 @@ def get_maps(lattice):
                 slices = io.get_slices()
                 #print "%s:" % slices[0].get_lattice_element().get_name()
                 if len(slices) > 1:
-                    raise RuntimeError, "found multiple slices in an independent operator"
+                    raise RuntimeError("found multiple slices in an independent operator")
                 for operation in io.get_operations():
                     if operation.get_type() == 'fast_mapping':
                         fmo = synergia.simulation.as_fast_mapping_operation(operation)

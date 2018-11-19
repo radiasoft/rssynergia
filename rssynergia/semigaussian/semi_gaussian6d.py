@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from mpi4py import MPI
 from scipy import constants
 
-from semi_gaussian import SemiGaussianBeam
+from .semi_gaussian import SemiGaussianBeam
 from rssynergia.base_diagnostics import read_bunch
 from rssynergia.base_diagnostics import workflow
 from rssynergia.base_diagnostics import latticework
@@ -71,7 +71,7 @@ def semigaussianbeam6D(opts):
         
         
         lc = coords.shape[0]
-        print lc
+        print(lc)
         if dpop == 0:
             pArray = np.zeros(lc)
         else:
@@ -90,8 +90,8 @@ def semigaussianbeam6D(opts):
 
         if os.path.isfile(filename):
             newfilename = filename+str(int(time.time()))
-            print ' !Warning -- '
-            print 'File '+filename+' already exists. Renaming the old file to '+newfilename
+            print(' !Warning -- ')
+            print('File '+filename+' already exists. Renaming the old file to '+newfilename)
             os.rename('./'+filename, './'+newfilename)
     
         bunchfile = open(filename, 'w')

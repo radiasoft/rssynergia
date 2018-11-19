@@ -5,7 +5,7 @@ import tables
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-import options
+from . import options
 
 coords = {}
 coords['x'] = 0
