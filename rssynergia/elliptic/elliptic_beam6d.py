@@ -74,10 +74,11 @@ def toyellipticalbeam6D(opts):
         innerBunch = np.zeros(numMacroParticles) #bunch at this emittance
         transverseEmittance = emit
 
-        if opts.quiet:
-            myBunchGenerator = EllipticBeam(t, c, beta, betaPrime, opts.quiet)
-        else:
-            myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
+#        if opts.quiet:
+#            myBunchGenerator = EllipticBeam(t, c, beta, betaPrime, opts.quiet)
+#        else:
+#            myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
+        myBunchGenerator = EllipticBeam(t, c, beta, betaPrime)
         #coords is an array of 4-vectors containing coordinate space information
         coords = myBunchGenerator.generatefixedbunch(transverseEmittance, numMacroParticles, opts.seed)
 
