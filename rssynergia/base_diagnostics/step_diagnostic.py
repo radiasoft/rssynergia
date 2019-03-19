@@ -51,6 +51,9 @@ class CustomDiagnostic(synergia.simulation.Propagate_actions):
             if len(elem_steps) > 0:
                 self.steps.append(elem_steps[len(elem_steps) // 2])  # output in middle of element
                 self.diagnostics.append(elem[1])
+            elif len(elem_steps) == 1:
+                self.steps.append(elem_steps[0])  # output in middle of element
+                self.diagnostics.append(elem[1])
             else:
                 print("Could not find element: {}".format(elem[0]))
         for step in step_numbers:
@@ -93,7 +96,7 @@ class CustomDiagnostic(synergia.simulation.Propagate_actions):
             slice_element = slc.get_lattice_element()
             if slice_element.get_name() == element_name:
                 position = stepper.get_lattice_simulator().get_lattice_functions(slc).arc_length
-                steps.append((step_number, step))
+                steps.append(step_number)
                 print("Step: {}: Slice {}, Element {}, position {}".format(step_number, slc,
                                                                            slice_element.get_name(),
                                                                            position))
@@ -186,3 +189,16 @@ def xdistribution(bunch):
         for i in range(1, bins.size):
             centers.append((bins[i] + bins[i - 1]) / 2.)
         return np.array([hist, centers])
+
+def xydistribution(bunch):
+    all_particles = comm_world.gather(bunch.get_local_particles(), root=0)
+    if comm_world.rank == 0:
+        all_particles = np.vstack(all_particles)
+
+        minx, maxx = all_particles[:, 0].min(), all_particles[:, 0].max()
+        miny, maxy = all_particles[:, 1].min(), all_particles[:, 1].max()
+        hist, binsx, binsy = np.histogram2d(all_particles[:, 0],
+                                    all_particles[:, 1],
+                                    range=[[minx, maxx], [miny, maxy]], bins=64)
+        hist = np.append(hist, [-1])
+        return np.array([hist, binsx, binsy])
