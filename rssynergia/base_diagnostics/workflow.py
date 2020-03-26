@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""?
+
+:copyright: Copyright (c) 2020 RadiaSoft LLC.  All Rights Reserved.
+:license: http://www.apache.org/licenses/LICENSE-2.0.html
+"""
+from __future__ import absolute_import, division, print_function
 import sys, os
 import synergia
 from mpi4py import MPI
@@ -7,29 +14,29 @@ import synergia_workflow
 
 def make_opts(name, order, outputdir, steps, steps_per_element, **kwargs):
     '''A quick function for defining a Synergia options object for map propagator comparisons.
-    
+
     Args:
         name (str): name associated with Options object
         order (str): map order for lattice simulator construction
         outputdir (str): output directory for simulation diagnostics
         steps (int): number of steps per turn for constructing stepper
         steps_per_element (int): number of steps per element
-    
-    Takes **kwargs input. 
-    
+
+    Takes **kwargs input.
+
     Returns
         opts (object): options object for Synergia simulations
-    
+
     '''
 
     opts = synergia_workflow.Options(name)
     opts.add("map_order", order, "Map order", int)
-    
+
     #default output directory
     opts.add("output_dir",str(outputdir),"Directory for output files", str)
-    
-    
-    
+
+
+
     #opts.add("map_order", 1, "Map order", int)
     opts.add("steps", steps, "Number of steps per turn", int)
     opts.add("steps_per_element",steps_per_element,"Number of steps per element", int)
@@ -65,28 +72,28 @@ def make_opts(name, order, outputdir, steps, steps_per_element, **kwargs):
     opts.add("use_maps", "all", "use maps for propagation either all, none, onlyrf, nonrf")
     #opts.add("allmaps", False, "Use all maps for propagation", bool)
     opts.add("stepper", "splitoperator", "Simulation stepper, either 'independent','elements','splitoperator','soelements'", str)
-    
+
     for key,vals in kwargs.items():
 
     #Quick and dirty overwrite
         if opts.has_option(key):
-            print "Overwriting option " + key
+            print("Overwriting option " + key)
             setattr(opts,key, vals[0])
         else:
             if len(vals) == 3:
                 opts.add(key, vals[0], vals[1], vals[2])
             elif len(vals) == 2:
                 opts.add(key, vals[0], vals[1])
-    
-    
+
+
     return opts
 
 def make_path(dirname):
     '''Create a directory with the specified name - avoid race conditions if possible
-    
+
     Args:
         dirname (str): name of directory to be constructed
-    
+
     '''
 
     try:
@@ -98,17 +105,17 @@ def make_path(dirname):
         else:
             # There was an error on creation, so make sure we know about it
             raise
-            
+
 def cleanup(dirname):
     '''Cleanup files after run and move diagnostic outputs to proper directory.
-    
+
     Arguments
         dirname (str): This is the relative path - e.g. full path = pwd + dirname
-    
+
     '''
     curdir = os.getcwd()
     newdir = os.getcwd() + dirname
-    
+
     for filename in os.listdir(curdir):
         if filename.endswith('.h5') or filename=='log':
             try:
@@ -125,10 +132,6 @@ def cleanup(dirname):
                     #perhaps trying to move to a new disk or something that os can't handle
                     raise
 
-                    
+
 def log_input(opts):
     '''DEPRECATED: Write an output file containing necessary simulation parameters for reproduction'''
-    
-
-    
-    

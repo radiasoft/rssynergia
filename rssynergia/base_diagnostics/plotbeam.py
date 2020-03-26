@@ -1,11 +1,16 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""?
 
-import sys
-import tables
-import numpy as np
+:copyright: Copyright (c) 2020 RadiaSoft LLC.  All Rights Reserved.
+:license: http://www.apache.org/licenses/LICENSE-2.0.html
+"""
+from __future__ import absolute_import, division, print_function
+from rssynergia.base_diagnostics import options
 import math
 import matplotlib.pyplot as plt
-import options
+import numpy as np
+import sys
+import tables
 
 coords = {}
 coords['x'] = 0
@@ -20,12 +25,12 @@ coords['id'] = 6
 def plotbeam(opts, particles, header):
 
     '''Returns a 2D plot of particle distribution in the choosen coordinate space
-    
+
     Arguments:
-        opts (options.Options): A Synergia options instance 
+        opts (options.Options): A Synergia options instance
         particles (ndarray): An array of particles, organized according to the coords dictionary
         header (dict): A Python dictionary with metadata for the particle array
-    
+
     '''
 
     h = particles[:,coords[opts.hcoord]]
@@ -34,7 +39,7 @@ def plotbeam(opts, particles, header):
 
     fig = plt.figure()
     ax = plt.gca()
-    
+
     ax.scatter(h,v, c ='b')
     ax.set_aspect('equal', 'datalim')
     #plt.plot(h,v, 'o')
@@ -45,28 +50,28 @@ def plotbeam(opts, particles, header):
         title = title + ' for lattice ' + opts.lattice_name
     plt.title(title, y=1.05, fontsize=14)
     plt.show()
-    
+
     if opts.save:
         sv_title = 'Beam_' + opts.lattice_name + '.pdf'
         fig.savefig(sv_title, bbox_inches='tight')
-    
-    
+
+
 #define an option to replicate the pltbunch.plot_bunch function?
 
 
 def get_particles(opts):
-    
+
     '''
     Reads an input file and returns a numpy array of particles and a dictionary of root values
-    
+
     Arguments:
         opts (options.Options): A Synergia options instance
-    
+
     '''
-    
+
     f = tables.open_file(opts.inputfile, 'r')
     particles = f.root.particles.read()
-    
+
     #get appropriate reference properties from file root
     npart = particles.shape[0]
     mass = f.root.mass[()]
@@ -75,28 +80,27 @@ def get_particles(opts):
     tn = f.root.tlen[()] #cumulative tracked length for this file
 
     f.close()
-    
+
     header = dict()
     header['n_part'] = npart
     header['mass'] = mass
     header['p_ref'] = p_ref
     header['s_val'] = sn
     header['t_len'] = tn
-    
+
     return header,particles
-    
+
 
 def plot_beam(opts):
     '''
     Plot a beam of particles given an options object input.
-    
+
     Arguments:
         opts (options.Options): A Synergia options instance
-    
+
     '''
-    
+
     header, particles = get_particles(opts)
 
     if opts.plots ==1:
         plotbeam(opts, particles,header)
-        
